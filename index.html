@@ -51,18 +51,22 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
+        /* LOGO MÁS GRANDE Y VISIBLE */
         .brand img {
-            width: 45px;
+            width: 65px;
             height: auto;
-            border-radius: 6px;
+            border-radius: 8px;
+            background: rgba(61, 214, 140, 0.05);
+            padding: 4px;
+            border: 1px solid var(--border-color);
         }
 
         .brand span {
             font-weight: 800;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             letter-spacing: -0.5px;
             color: var(--accent-mint);
         }
@@ -197,7 +201,7 @@
         }
 
         .forum-list {
-            max-height: 280px;
+            max-height: 320px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -253,7 +257,7 @@
                 <img src="Logotipo.png" alt="Data Trash Logo">
                 <span>DATA TRASH</span>
             </div>
-            <div style="color: var(--text-muted); font-size: 0.85rem;">Proyecto Eco-Digital</div>
+            <div style="color: var(--text-muted); font-size: 0.85rem;">Proyecto Tecnología y Medioambiente</div>
         </header>
 
         <!-- MONITOREO TIEMPO REAL -->
@@ -272,7 +276,7 @@
                 <h3>⚡ El problema invisible</h3>
                 <p>Cada correo de confirmación viejísimo, cada foto borrosa o repetida y cada respaldo olvidado ocupa espacio físico en data centers que consumen energía y agua dulce las 24 horas del día.</p>
                 <br>
-                <p>No se trata de desconectarse de internet, sino de hacer una **limpieza inteligente** para no acumular peso innecesario en la red.</p>
+                <p>No se trata de desconectarse de internet, sino de hacer una <strong>limpieza inteligente</strong> para no acumular peso innecesario en la red.</p>
             </div>
 
             <!-- FORO / INTERACCIÓN -->
@@ -308,7 +312,6 @@
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const elapsedSeconds = (now.getTime() - startOfDay) / 1000;
             
-            // Tasa más realista por segundo (toneladas de CO2)
             const ratePerSecond = 0.0082; 
             baseValue = (elapsedSeconds * ratePerSecond);
             updateDisplay();
@@ -321,7 +324,6 @@
             }) + ' t';
         }
 
-        // Incremento leve cada 1.5 segundos con variación aleatoria ligera
         setInterval(() => {
             const randomAdd = 0.005 + (Math.random() * 0.008);
             baseValue += randomAdd;
@@ -331,20 +333,37 @@
         initCounter();
 
 
-        // 2. SISTEMA DE COMENTARIOS DINÁMICOS CON TIEMPO RELATIVO
+        // 2. COMENTARIOS ESCALADOS EN EL TIEMPO
         const defaultComments = [
-            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", minutesAgo: 8 },
-            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", minutesAgo: 23 },
-            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", minutesAgo: 54 },
-            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", minutesAgo: 110 }
+            // HOY
+            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", minutesAgo: 14 },
+            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", minutesAgo: 48 },
+            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", minutesAgo: 110 },
+            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", minutesAgo: 230 },
+            
+            // HACE 1 DÍA (Ayer)
+            { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", minutesAgo: 1440 },
+            { user: "@caro_perez", text: "cancelé la suscripción a newsletters que ni leía. algo es algo!", minutesAgo: 1680 },
+            { user: "@ing_fer", text: "buenísima iniciativa, pocos entienden el impacto de la nube", minutesAgo: 1920 },
+            { user: "@alejo_gt", text: "300 capturas de pantalla viejas borradas de una sola", minutesAgo: 2160 },
+            
+            // HACE 2 DÍAS
+            { user: "@andrea.v", text: "mi google drive ya me pedía pagar almacenamiento, borré basura y recuperé 5GB gratis jajaja", minutesAgo: 2880 },
+            { user: "@lucas_r", text: "se lo mandé a mi grupo de la u para que también limpien los archivos viejos", minutesAgo: 3100 },
+            { user: "@valeria_m", text: "a borrar todo lo que no sirva!!", minutesAgo: 3400 }
         ];
 
         function getRelativeTime(minutesAgo) {
             if (minutesAgo < 60) {
                 return `hace ${minutesAgo} min`;
-            } else {
+            } else if (minutesAgo < 1440) {
                 const hours = Math.floor(minutesAgo / 60);
                 return `hace ${hours} h`;
+            } else if (minutesAgo < 2880) {
+                return `ayer`;
+            } else {
+                const days = Math.floor(minutesAgo / 1440);
+                return `hace ${days} días`;
             }
         }
 
@@ -352,10 +371,7 @@
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '';
 
-            // Cargar locales del usuario si existen
             const savedComments = JSON.parse(localStorage.getItem('dt_user_comments') || '[]');
-            
-            // Unir y renderizar
             const allComments = [...savedComments, ...defaultComments];
 
             allComments.forEach(item => {
