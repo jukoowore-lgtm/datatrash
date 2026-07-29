@@ -16,7 +16,6 @@
             --text-main: #f0f7f4;
             --text-muted: #6b8278;
             --border-color: #1e362b;
-            --nikke-blue: #00d2ff;
         }
 
         * {
@@ -60,7 +59,7 @@
             position: absolute;
             bottom: -2px;
             left: 0;
-            width: 120px;
+            width: 150px;
             height: 2px;
             background: var(--accent-mint);
             box-shadow: 0 0 10px var(--accent-mint);
@@ -69,24 +68,24 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
-        /* LOGO PROMINENTE / PUBLICITARIO */
+        /* LOGO PROMINENTE GIGANTE */
         .brand-logo-container {
             position: relative;
             background: rgba(61, 214, 140, 0.05);
             border: 2px solid var(--accent-mint);
-            border-radius: 12px;
-            padding: 6px;
-            box-shadow: 0 0 20px rgba(61, 214, 140, 0.2);
+            border-radius: 14px;
+            padding: 8px;
+            box-shadow: 0 0 25px rgba(61, 214, 140, 0.25);
         }
 
         .brand img {
-            width: 110px; /* LOGO AGRANDADO */
+            width: 160px; /* LOGO GIGANTE */
             height: auto;
             display: block;
-            border-radius: 6px;
+            border-radius: 8px;
         }
 
         .brand-text-group {
@@ -97,7 +96,7 @@
         .brand-text-group h1 {
             font-family: 'JetBrains Mono', monospace;
             font-weight: 800;
-            font-size: 1.8rem;
+            font-size: 2.2rem;
             letter-spacing: -0.5px;
             color: var(--accent-mint);
             text-transform: uppercase;
@@ -105,7 +104,7 @@
 
         .brand-text-group span {
             color: var(--text-muted);
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -121,8 +120,8 @@
             background: rgba(20, 34, 28, 0.8);
             border: 1px solid var(--border-color);
             color: var(--text-main);
-            padding: 10px 18px;
-            font-size: 0.8rem;
+            padding: 12px 20px;
+            font-size: 0.85rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -283,26 +282,6 @@
             margin-bottom: 20px;
         }
 
-        .btn-action {
-            background: transparent;
-            border: 1px solid var(--accent-mint);
-            color: var(--accent-mint);
-            padding: 10px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            text-decoration: none;
-            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
-            transition: all 0.2s;
-        }
-
-        .btn-action:hover {
-            background: var(--accent-mint);
-            color: #000;
-        }
-
         /* GRID INFERIOR (FORO + CONCIENCIA) */
         .grid-layout {
             display: grid;
@@ -313,6 +292,7 @@
 
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 20px; align-items: flex-start; }
+            .brand img { width: 120px; }
             .grid-layout { grid-template-columns: 1fr; }
             .counter-number { font-size: 2.4rem; }
         }
@@ -404,7 +384,7 @@
                 </div>
                 <div class="brand-text-group">
                     <h1>DATA TRASH</h1>
-                    <span>Tecnología y Medioambiente</span>
+                    <span>Proyecto Tecnología y Medioambiente</span>
                 </div>
             </div>
 
@@ -439,7 +419,6 @@
                         <h3>Huella de Carbono Digital</h3>
                         <p>Descubre el verdadero impacto ambiental que genera el almacenamiento masivo en la nube y los centros de datos.</p>
                     </div>
-                    <!-- REEMPLAZA EL 'href' CON TU ENLACE O FICHERO DE INFOGRAFÍA -->
                     <a href="https://canva.com" target="_blank" class="hud-btn" style="text-align: center; justify-content: center;">
                         📄 VER INFOGRAFÍA COMPLETA
                     </a>
@@ -499,7 +478,7 @@
     </div>
 
     <script>
-        // 1. ALGORITMO DE CONTADOR
+        // 1. ALGORITMO DE CONTADOR REALISTA
         let baseValue = 0;
 
         function initCounter() {
@@ -527,35 +506,49 @@
 
         initCounter();
 
-        // 2. SISTEMA DE COMENTARIOS CON HISTORIAL
+        // 2. SISTEMA DE COMENTARIOS BASADO EN TIMESTAMPS REALES (CÁLCULO DINÁMICO)
+        const now = Date.now();
+        const min = 60 * 1000;
+        const hour = 60 * min;
+        const day = 24 * hour;
+
+        // Comentarios por defecto con marcas de tiempo relativas al momento actual
         const defaultComments = [
-            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", minutesAgo: 14 },
-            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", minutesAgo: 48 },
-            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", minutesAgo: 110 },
-            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", minutesAgo: 230 },
-            { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", minutesAgo: 1440 },
-            { user: "@caro_perez", text: "cancelé la suscripción a newsletters que ni leía. algo es algo!", minutesAgo: 1680 },
-            { user: "@ing_fer", text: "buenísima iniciativa, pocos entienden el impacto de la nube", minutesAgo: 1920 },
-            { user: "@alejo_gt", text: "300 capturas de pantalla viejas borradas de una sola", minutesAgo: 2160 },
-            { user: "@andrea.v", text: "mi google drive ya me pedía pagar almacenamiento, borré basura y recuperé 5GB gratis jajaja", minutesAgo: 2880 }
+            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", timestamp: now - (14 * min) },
+            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", timestamp: now - (48 * min) },
+            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", timestamp: now - (2 * hour) },
+            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", timestamp: now - (4 * hour) },
+            { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", timestamp: now - (1 * day) },
+            { user: "@caro_perez", text: "cancelé la suscripción a newsletters que ni leía. algo es algo!", timestamp: now - (1 * day + 4 * hour) },
+            { user: "@ing_fer", text: "buenísima iniciativa, pocos entienden el impacto de la nube", timestamp: now - (2 * day) },
+            { user: "@andrea.v", text: "mi google drive ya me pedía pagar almacenamiento, borré basura y recuperé 5GB gratis jajaja", timestamp: now - (2 * day + 5 * hour) }
         ];
 
-        function getRelativeTime(minutesAgo) {
-            if (minutesAgo < 60) return `hace ${minutesAgo} min`;
-            if (minutesAgo < 1440) return `hace ${Math.floor(minutesAgo / 60)} h`;
-            if (minutesAgo < 2880) return `ayer`;
-            return `hace ${Math.floor(minutesAgo / 1440)} días`;
+        function calculateTimeAgo(timestamp) {
+            const diff = Date.now() - timestamp;
+            
+            const diffMinutes = Math.floor(diff / (1000 * 60));
+            const diffHours = Math.floor(diff / (1000 * 60 * 60));
+            const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (diffMinutes < 1) return 'hace un momento';
+            if (diffMinutes < 60) return `hace ${diffMinutes} min`;
+            if (diffHours < 24) return `hace ${diffHours} h`;
+            if (diffDays === 1) return 'ayer';
+            return `hace ${diffDays} días`;
         }
 
         function loadComments() {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '';
 
-            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments') || '[]');
-            const allComments = [...savedComments, ...defaultComments];
+            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments_v2') || '[]');
+            
+            // Combinar guardados con defaults y ordenar por fecha (más reciente primero)
+            const allComments = [...savedComments, ...defaultComments].sort((a, b) => b.timestamp - a.timestamp);
 
             allComments.forEach(item => {
-                const timeText = item.minutesAgo !== undefined ? getRelativeTime(item.minutesAgo) : 'hace un momento';
+                const timeText = calculateTimeAgo(item.timestamp);
                 
                 const postHTML = `
                     <div class="post-item">
@@ -585,16 +578,19 @@
             const newComment = {
                 user: author,
                 text: msgInput.value.trim(),
-                minutesAgo: 0
+                timestamp: Date.now() // Guardado con marca de tiempo precisa del sistema
             };
 
-            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments') || '[]');
+            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments_v2') || '[]');
             savedComments.unshift(newComment);
-            localStorage.setItem('dt_user_comments', JSON.stringify(savedComments));
+            localStorage.setItem('dt_user_comments_v2', JSON.stringify(savedComments));
 
             msgInput.value = '';
             loadComments();
         }
+
+        // Recargar comentarios cada minuto para actualizar los tiempos en vivo si la página sigue abierta
+        setInterval(loadComments, 60000);
 
         loadComments();
     </script>
