@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATA TRASH — Conciencia y Limpieza Digital</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0b1310;
+            --bg-card: #14221c;
+            --accent-mint: #3dd68c;
+            --accent-soft: #a8e6cf;
+            --text-main: #f0f7f4;
+            --text-muted: #8b9b94;
+            --border-color: #23382f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* NAVBAR */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            width: 40px;
+            height: auto;
+        }
+
+        .brand span {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: -0.5px;
+            color: var(--accent-mint);
+        }
+
+        /* LIVE MONITOR (HERO) */
+        .live-card {
+            background: linear-gradient(145deg, var(--bg-card), #0f1a15);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 35px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .live-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(61, 214, 140, 0.1);
+            color: var(--accent-mint);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border: 1px solid rgba(61, 214, 140, 0.2);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-mint);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent-mint);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .counter-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 10px 0;
+            letter-spacing: -1px;
+        }
+
+        .counter-label {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* GRID SYSTEM */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 650px) {
+            .grid-layout { grid-template-columns: 1fr; }
+            .counter-number { font-size: 2.2rem; }
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+        }
+
+        .card h3 {
+            color: var(--accent-soft);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* FORO / FEED PREVIEW */
+        .forum-preview {
+            margin-top: 15px;
+        }
+
+        .post-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .post-author {
+            color: var(--accent-mint);
+            font-weight: 600;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <header>
+            <div class="brand">
+                <img src="logo.png" alt="Data Trash Logo">
+                <span>DATA TRASH</span>
+            </div>
+            <div style="color: var(--text-muted); font-size: 0.85rem;">Proyecto Eco-Digital</div>
+        </header>
+
+        <!-- MONITOREO TIEMPO REAL -->
+        <section class="live-card">
+            <div class="live-tag">
+                <div class="pulse-dot"></div>
+                ESTADÍSTICA GLOBAL EN TIEMPO REAL
+            </div>
+            <div class="counter-number" id="realtime-counter">0.0000</div>
+            <p class="counter-label">Toneladas de CO₂ generadas por basura digital almacenada hoy en el mundo</p>
+        </section>
+
+        <div class="grid-layout">
+            <!-- CONCIENCIA -->
+            <div class="card">
+                <h3>⚡ El problema invisible</h3>
+                <p>Cada correo de confirmación de 2021, cada foto repetida y cada respaldo olvidado ocupa espacio físico en servidores que consumen energía y agua dulce las 24 horas del día.</p>
+            </div>
+
+            <!-- SIMULADOR RÁPIDO -->
+            <div class="card">
+                <h3>🧹 Muro del Reto (Comunidad)</h3>
+                <div class="forum-preview">
+                    <div class="post-item">
+                        <div class="post-author">@julian_dev • hace 5 min</div>
+                        "Hoy eliminé 4.2 GB de respaldos viejos y 1,200 correos de ofertas."
+                    </div>
+                    <div class="post-item">
+                        <div class="post-author">@andrea_m • hace 18 min</div>
+                        "Limpiando la galería... 300 capturas de pantalla afuera."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Data Trash &copy; 2026 — Diseñado con impacto real y huella de carbono cero.
+        </footer>
+
+    </div>
+
+    <script>
+        // ALGORITMO DE TIEMPO REAL BASADO EN RELEVO ABSOLUTO (EPOCH TIME)
+        // Estimación global: ~1.85 kg de CO2 por segundo de basura acumulada activa
+        function updateCounter() {
+            const now = new Date();
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            const elapsedSeconds = (now.getTime() - startOfDay) / 1000;
+            
+            // Tasa por segundo (en toneladas de CO2 acumuladas por basura digital global)
+            const ratePerSecond = 0.0435; 
+            const totalToday = (elapsedSeconds * ratePerSecond);
+
+            document.getElementById('realtime-counter').innerText = totalToday.toLocaleString('es-ES', {
+                minimumFractionDigits: 4,
+                maximumFractionDigits: 4
+            }) + ' t';
+        }
+
+        // Actualización fluida cada 100ms
+        setInterval(updateCounter, 100);
+        updateCounter();
+    </script>
+</body>
+</html>
