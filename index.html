@@ -771,22 +771,34 @@
 
         initCounter();
 
-        // 3. SISTEMA DE COMENTARIOS DINÁMICOS
-        const nowTime = Date.now();
-        const min = 60 * 1000;
-        const hour = 60 * min;
-        const day = 24 * hour;
+        // 3. SISTEMA DE TIEMPO REAL Y TIMESTAMPS PERSISTENTES (CORREGIDO)
+        function getBaseComments() {
+            const stored = localStorage.getItem('dt_comments_v3');
+            if (stored) {
+                return JSON.parse(stored);
+            }
 
-        const defaultComments = [
-            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", timestamp: nowTime - (14 * min) },
-            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", timestamp: nowTime - (48 * min) },
-            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", timestamp: nowTime - (2 * hour) },
-            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", timestamp: nowTime - (4 * hour) },
-            { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", timestamp: nowTime - (1 * day) }
-        ];
+            const currentTime = Date.now();
+            const min = 60 * 1000;
+            const hour = 60 * min;
+            const day = 24 * hour;
+
+            const initialData = [
+                { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", timestamp: currentTime - (120 * min) },
+                { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", timestamp: currentTime - (180 * min) },
+                { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", timestamp: currentTime - (5 * hour) },
+                { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", timestamp: currentTime - (8 * hour) },
+                { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", timestamp: currentTime - (1 * day) }
+            ];
+
+            localStorage.setItem('dt_comments_v3', JSON.stringify(initialData));
+            return initialData;
+        }
 
         function calculateTimeAgo(timestamp) {
-            const diff = Date.now() - timestamp;
+            const currentNow = Date.now();
+            const diff = currentNow - timestamp;
+            
             const diffMinutes = Math.floor(diff / (1000 * 60));
             const diffHours = Math.floor(diff / (1000 * 60 * 60));
             const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -794,17 +806,18 @@
             if (diffMinutes < 1) return 'hace un momento';
             if (diffMinutes < 60) return `hace ${diffMinutes} min`;
             if (diffHours < 24) return `hace ${diffHours} h`;
-            if (diffDays === 1) return 'ayer';
+            if (diffDays === 1) return 'hace 1 día';
             return `hace ${diffDays} días`;
         }
 
         function loadComments() {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '';
-            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments_v2') || '[]');
-            const allComments = [...savedComments, ...defaultComments].sort((a, b) => b.timestamp - a.timestamp);
+            
+            const comments = getBaseComments();
+            comments.sort((a, b) => b.timestamp - a.timestamp);
 
-            allComments.forEach(item => {
+            comments.forEach(item => {
                 const timeText = calculateTimeAgo(item.timestamp);
                 const postHTML = `
                     <div class="post-item">
@@ -837,15 +850,15 @@
                 timestamp: Date.now()
             };
 
-            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments_v2') || '[]');
-            savedComments.unshift(newComment);
-            localStorage.setItem('dt_user_comments_v2', JSON.stringify(savedComments));
+            const comments = getBaseComments();
+            comments.unshift(newComment);
+            localStorage.setItem('dt_comments_v3', JSON.stringify(comments));
 
             msgInput.value = '';
             loadComments();
         }
 
-        setInterval(loadComments, 60000);
+        setInterval(loadComments, 30000);
         loadComments();
     </script>
 </body>
