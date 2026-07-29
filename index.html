@@ -7,15 +7,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos de redes y sistema -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
-            --bg-primary: #080d0b;
-            --bg-card: #0f1a15;
+            --bg-primary: #060a08;
+            --bg-card: #0d1712;
             --accent-mint: #3dd68c;
             --accent-soft: #a8e6cf;
             --text-main: #f0f7f4;
             --text-muted: #6b8278;
             --border-color: #1e362b;
+            --hud-gold: #e6b800;
         }
 
         * {
@@ -29,18 +33,20 @@
             background-color: var(--bg-primary);
             background-image: 
                 radial-gradient(circle at 50% 0%, rgba(61, 214, 140, 0.08) 0%, transparent 60%),
-                linear-gradient(rgba(30, 54, 43, 0.2) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(30, 54, 43, 0.2) 1px, transparent 1px);
+                linear-gradient(rgba(30, 54, 43, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 54, 43, 0.15) 1px, transparent 1px);
             background-size: 100% 100%, 30px 30px, 30px 30px;
             color: var(--text-main);
-            padding: 20px;
+            padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
         .app-container {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
+            padding: 20px;
         }
 
         /* HEADER & NAVBAR estilo NIKKE HUD */
@@ -50,7 +56,7 @@
             align-items: center;
             padding: 25px 0;
             border-bottom: 2px solid var(--border-color);
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             position: relative;
         }
 
@@ -59,7 +65,7 @@
             position: absolute;
             bottom: -2px;
             left: 0;
-            width: 150px;
+            width: 180px;
             height: 2px;
             background: var(--accent-mint);
             box-shadow: 0 0 10px var(--accent-mint);
@@ -71,7 +77,6 @@
             gap: 25px;
         }
 
-        /* LOGO PROMINENTE GIGANTE */
         .brand-logo-container {
             position: relative;
             background: rgba(61, 214, 140, 0.05);
@@ -82,38 +87,32 @@
         }
 
         .brand img {
-            width: 160px; /* LOGO GIGANTE */
+            width: 160px;
             height: auto;
             display: block;
             border-radius: 8px;
-        }
-
-        .brand-text-group {
-            display: flex;
-            flex-direction: column;
         }
 
         .brand-text-group h1 {
             font-family: 'JetBrains Mono', monospace;
             font-weight: 800;
             font-size: 2.2rem;
-            letter-spacing: -0.5px;
             color: var(--accent-mint);
             text-transform: uppercase;
+            letter-spacing: -0.5px;
         }
 
         .brand-text-group span {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 600;
             letter-spacing: 1px;
             text-transform: uppercase;
         }
 
-        /* NIKKE STYLE NAV BUTTONS */
         .nav-hub {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .hud-btn {
@@ -147,15 +146,108 @@
             background: rgba(61, 214, 140, 0.1);
         }
 
+        /* NIKKE SLIDER / CARRUSEL PRINCIPAL */
+        .nikke-slider-wrapper {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            margin-bottom: 35px;
+            border: 1px solid var(--border-color);
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .slide-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .slide-item.active {
+            opacity: 1;
+        }
+
+        /* Overlay Gradiente sobre diapositivas */
+        .slide-overlay {
+            width: 100%;
+            padding: 40px;
+            background: linear-gradient(180deg, transparent 0%, rgba(6, 10, 8, 0.95) 85%);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .slide-caption h2 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.8rem;
+            color: #fff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(61, 214, 140, 0.5);
+        }
+
+        .slide-caption p {
+            color: var(--accent-soft);
+            font-size: 0.95rem;
+            max-width: 600px;
+            line-height: 1.4;
+        }
+
+        /* NAV DOTS & CONTROLES NIKKE */
+        .slider-controls {
+            position: absolute;
+            bottom: 25px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .slider-counter {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--accent-mint);
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .slider-indicators {
+            display: flex;
+            gap: 8px;
+        }
+
+        .indicator-dot {
+            width: 30px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            background: var(--accent-mint);
+            box-shadow: 0 0 8px var(--accent-mint);
+            width: 45px;
+        }
+
         /* LIVE MONITOR HUB */
         .live-card {
             background: linear-gradient(135deg, rgba(20, 34, 28, 0.9), rgba(10, 18, 14, 0.95));
             border: 1px solid var(--border-color);
             border-left: 4px solid var(--accent-mint);
-            padding: 30px;
+            padding: 25px;
             text-align: center;
             margin-bottom: 35px;
-            position: relative;
             clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
         }
 
@@ -170,7 +262,7 @@
             font-size: 0.75rem;
             font-weight: 700;
             letter-spacing: 1.5px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             border: 1px solid rgba(61, 214, 140, 0.3);
         }
 
@@ -196,17 +288,15 @@
             color: #ffffff;
             text-shadow: 0 0 20px rgba(61, 214, 140, 0.3);
             margin: 5px 0;
-            letter-spacing: -1px;
         }
 
         .counter-label {
             color: var(--text-muted);
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
-        /* SECTION HEADERS STYLE NIKKE */
+        /* SECCIONES Y TARJETAS HUD */
         .section-header {
             display: flex;
             align-items: center;
@@ -230,25 +320,19 @@
             font-size: 0.65rem;
             font-weight: 800;
             padding: 2px 6px;
-            border-radius: 2px;
-        }
-
-        /* NIKKE STYLE CARDS / FEATURES GRID */
-        .features-section {
-            margin-bottom: 35px;
         }
 
         .cards-grid-nikke {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
+            margin-bottom: 35px;
         }
 
         .feature-card {
             background: var(--bg-card);
             border: 1px solid var(--border-color);
-            padding: 20px;
-            position: relative;
+            padding: 22px;
             clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
             transition: transform 0.2s, border-color 0.2s;
             display: flex;
@@ -261,16 +345,26 @@
             border-color: var(--accent-mint);
         }
 
+        .card-icon-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon-header i {
+            font-size: 1.8rem;
+            color: var(--accent-mint);
+        }
+
         .feature-card .card-code {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.7rem;
             color: var(--accent-mint);
-            margin-bottom: 10px;
-            display: block;
         }
 
         .feature-card h3 {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             color: var(--text-main);
             margin-bottom: 10px;
         }
@@ -287,13 +381,13 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         @media (max-width: 768px) {
             header { flex-direction: column; gap: 20px; align-items: flex-start; }
-            .brand img { width: 120px; }
             .grid-layout { grid-template-columns: 1fr; }
+            .nikke-slider-wrapper { height: 300px; }
             .counter-number { font-size: 2.4rem; }
         }
 
@@ -301,10 +395,8 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             padding: 22px;
-            position: relative;
         }
 
-        /* FORO */
         .comment-form {
             display: flex;
             flex-direction: column;
@@ -321,7 +413,6 @@
             color: var(--text-main);
             font-size: 0.85rem;
             outline: none;
-            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .comment-form input:focus, .comment-form textarea:focus {
@@ -334,7 +425,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            padding-right: 5px;
         }
 
         .post-item {
@@ -362,13 +452,79 @@
             font-size: 0.7rem;
         }
 
-        footer {
-            text-align: center;
-            padding: 30px 0;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            border-top: 1px solid var(--border-color);
+        /* FOOTER ÉPICO ESTILO NIKKE WEB */
+        .nikke-footer {
+            width: 100%;
+            background: linear-gradient(180deg, rgba(6, 10, 8, 0.9) 0%, rgba(3, 5, 4, 1) 100%), 
+                        url('footer-bg.jpg') center/cover no-repeat;
+            border-top: 2px solid var(--border-color);
+            padding: 50px 20px 30px 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .footer-content {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .footer-brand h2 {
             font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-mint);
+            letter-spacing: 1px;
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-btn {
+            width: 45px;
+            height: 45px;
+            background: rgba(20, 34, 28, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            text-decoration: none;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: all 0.2s;
+        }
+
+        .social-btn:hover {
+            background: var(--accent-mint);
+            color: #000;
+            box-shadow: 0 0 12px var(--accent-mint);
+        }
+
+        .footer-bottom {
+            width: 100%;
+            max-width: 1100px;
+            border-top: 1px solid rgba(30, 54, 43, 0.5);
+            padding-top: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
         }
     </style>
 </head>
@@ -376,7 +532,7 @@
 
     <div class="app-container">
         
-        <!-- HEADER ESTILO NIKKE HUB -->
+        <!-- HEADER HUD -->
         <header>
             <div class="brand">
                 <div class="brand-logo-container">
@@ -389,10 +545,55 @@
             </div>
 
             <nav class="nav-hub">
-                <a href="#features" class="hud-btn active">📊 RECURSOS</a>
-                <a href="#foro" class="hud-btn">💬 FORO</a>
+                <a href="#hero-slider" class="hud-btn active"><i class="fa-solid fa-gamepad"></i> OPERACIÓN</a>
+                <a href="#features" class="hud-btn"><i class="fa-solid fa-layer-group"></i> RECURSOS</a>
+                <a href="#foro" class="hud-btn"><i class="fa-solid fa-comments"></i> COMUNIDAD</a>
             </nav>
         </header>
+
+        <!-- NIKKE STYLE HERO SLIDER -->
+        <div class="nikke-slider-wrapper" id="hero-slider">
+            
+            <!-- Slide 1 -->
+            <div class="slide-item active" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('slide1.jpg'), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1200');">
+                <div class="slide-overlay">
+                    <div class="slide-caption">
+                        <h2>// LIMPIEZA MÁSIVA DE SERVIDORES</h2>
+                        <p>Los centros de datos globales procesan petabytes de datos inservibles diariamente. Aprende a mitigar tu huella digital.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('slide2.jpg'), url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=1200');">
+                <div class="slide-overlay">
+                    <div class="slide-caption">
+                        <h2>// PROTOCOLO HUELLA CERO</h2>
+                        <p>Eliminar correos obsoletos y vaciar basureros virtuales reduce drásticamente la demanda eléctrica de los data centers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="slide-item" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('slide3.jpg'), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200');">
+                <div class="slide-overlay">
+                    <div class="slide-caption">
+                        <h2>// UNIDAD DE IMPACTO COMUNITARIO</h2>
+                        <p>Súmate al muro de acción. Cada archivo superfluo eliminado cuenta para la sostenibilidad tecnológica.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controles visuales Slider -->
+            <div class="slider-controls">
+                <span class="slider-counter" id="slide-num">01 / 03</span>
+                <div class="slider-indicators">
+                    <div class="indicator-dot active" onclick="setSlide(0)"></div>
+                    <div class="indicator-dot" onclick="setSlide(1)"></div>
+                    <div class="indicator-dot" onclick="setSlide(2)"></div>
+                </div>
+            </div>
+        </div>
 
         <!-- MONITOREO TIEMPO REAL -->
         <section class="live-card">
@@ -404,45 +605,63 @@
             <p class="counter-label">Toneladas de CO₂ estimadas por almacenamiento inactivo hoy en el mundo</p>
         </section>
 
-        <!-- SECCIÓN DE CARDS / INFOGRAFÍAS (INSPIRADO EN NIKKE FEATURES) -->
+        <!-- CARDS CON ICONOS ESTILO NIKKE -->
         <section class="features-section" id="features">
             <div class="section-header">
                 <span class="tag-badge">HUB</span>
-                <h2>Material Didáctico e Infografías</h2>
+                <h2>Recursos & Módulos Tácticos</h2>
             </div>
 
             <div class="cards-grid-nikke">
-                <!-- CARD 1: INFOGRAFÍA -->
                 <div class="feature-card">
                     <div>
-                        <span class="card-code">// INFOGRAPHIC_01</span>
+                        <div class="card-icon-header">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span class="card-code">// RECURSO_01</span>
+                        </div>
                         <h3>Huella de Carbono Digital</h3>
-                        <p>Descubre el verdadero impacto ambiental que genera el almacenamiento masivo en la nube y los centros de datos.</p>
+                        <p>Infografía interactiva sobre la contaminación invisible provocada por el almacenamiento en la nube.</p>
                     </div>
                     <a href="https://canva.com" target="_blank" class="hud-btn" style="text-align: center; justify-content: center;">
-                        📄 VER INFOGRAFÍA COMPLETA
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> VER RECURSO
                     </a>
                 </div>
 
-                <!-- CARD 2: GUÍA RÁPIDA -->
                 <div class="feature-card">
                     <div>
-                        <span class="card-code">// PROTOCOL_02</span>
+                        <div class="card-icon-header">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span class="card-code">// PROTOCOLO_02</span>
+                        </div>
                         <h3>Guía de Limpieza Digital</h3>
-                        <p>Aprende en 3 sencillos pasos cómo optimizar tu correo, nube y dispositivos para reducir tu huella hoy mismo.</p>
+                        <p>Pasos guiados para purgar correos viejos, cachés saturados y redundancia en almacenamiento.</p>
                     </div>
                     <a href="#foro" class="hud-btn" style="text-align: center; justify-content: center;">
-                        ⚡ APLICAR PROTOCOLO
+                        <i class="fa-solid fa-bolt"></i> INICIAR PROTOCOLO
+                    </a>
+                </div>
+
+                <div class="feature-card">
+                    <div>
+                        <div class="card-icon-header">
+                            <i class="fa-solid fa-server"></i>
+                            <span class="card-code">// TELEMETRÍA_03</span>
+                        </div>
+                        <h3>Impacto en Data Centers</h3>
+                        <p>Análisis del consumo energético e hídrico para mantener datos fríos e inactivos online.</p>
+                    </div>
+                    <a href="#features" class="hud-btn" style="text-align: center; justify-content: center;">
+                        <i class="fa-solid fa-chart-line"></i> EXPLORAR DATOS
                     </a>
                 </div>
             </div>
         </section>
 
+        <!-- SECCIÓN DE INTERACCIÓN -->
         <div class="grid-layout" id="foro">
-            <!-- CONCIENCIA -->
             <div class="hud-box">
                 <div class="section-header">
-                    <h2>⚡ El Problema Invisible</h2>
+                    <h2><i class="fa-solid fa-triangle-exclamation" style="color:var(--accent-mint)"></i> El Problema Invisible</h2>
                 </div>
                 <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6;">
                     Cada correo de confirmación viejísimo, cada foto borrosa o repetida y cada respaldo olvidado ocupa espacio físico en data centers que consumen energía y agua dulce las 24 horas del día.
@@ -453,41 +672,88 @@
                 </p>
             </div>
 
-            <!-- FORO / INTERACCIÓN -->
             <div class="hud-box">
                 <div class="section-header">
-                    <h2>💬 Muro Comunitario</h2>
+                    <h2><i class="fa-solid fa-comments" style="color:var(--accent-mint)"></i> Muro Comunitario</h2>
                 </div>
                 
-                <!-- Formulario -->
                 <div class="comment-form">
                     <input type="text" id="user-input" placeholder="Tu apodo o @usuario" maxlength="20">
                     <textarea id="msg-input" rows="2" placeholder="¿Qué basura digital borraste hoy?..." maxlength="140"></textarea>
-                    <button class="hud-btn" onclick="addComment()" style="width: 100%; justify-content: center;">PUBLICAR EN EL MURO</button>
+                    <button class="hud-btn" onclick="addComment()" style="width: 100%; justify-content: center;">
+                        <i class="fa-solid fa-paper-plane"></i> PUBLICAR EN EL MURO
+                    </button>
                 </div>
 
-                <!-- Lista de comentarios -->
                 <div class="forum-list" id="forum-list"></div>
             </div>
         </div>
 
-        <footer>
-            DATA TRASH SYSTEM v2.0 &copy; 2026 — IMPACTO REAL & HUELLA CERO
-        </footer>
-
     </div>
 
-    <script>
-        // 1. ALGORITMO DE CONTADOR REALISTA
-        let baseValue = 0;
+    <!-- FOOTER ÉPICO NIKKE -->
+    <footer class="nikke-footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h2>DATA TRASH SYSTEM</h2>
+                <p>Iniciativa tecnológica para la optimización y reducción de la huella digital.</p>
+            </div>
 
+            <!-- REDES SOCIALES E ICONOS -->
+            <div class="social-links">
+                <a href="https://github.com" target="_blank" class="social-btn" title="GitHub"><i class="fa-brands fa-github"></i></a>
+                <a href="https://twitter.com" target="_blank" class="social-btn" title="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+                <a href="https://discord.com" target="_blank" class="social-btn" title="Discord"><i class="fa-brands fa-discord"></i></a>
+                <a href="https://youtube.com" target="_blank" class="social-btn" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            DATA TRASH v3.0 &copy; 2026 — ALL RIGHTS RESERVED. INSPIRADO EN NIKKE HUD SYSTEM.
+        </div>
+    </footer>
+
+    <script>
+        // 1. LÓGICA DEL CARRUSEL / SLIDER NIKKE
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide-item');
+        const dots = document.querySelectorAll('.indicator-dot');
+        const counter = document.getElementById('slide-num');
+
+        function setSlide(index) {
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+            
+            counter.innerText = `0${currentSlide + 1} / 0${slides.length}`;
+        }
+
+        function autoSlide() {
+            let next = (currentSlide + 1) % slides.length;
+            setSlide(next);
+        }
+
+        let slideInterval = setInterval(autoSlide, 5000);
+
+        // Resetear timer si el usuario hace clic manual
+        document.querySelectorAll('.indicator-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(autoSlide, 5000);
+            });
+        });
+
+        // 2. CONTADOR EN TIEMPO REAL
+        let baseValue = 0;
         function initCounter() {
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const elapsedSeconds = (now.getTime() - startOfDay) / 1000;
-            
-            const ratePerSecond = 0.0082; 
-            baseValue = (elapsedSeconds * ratePerSecond);
+            baseValue = (elapsedSeconds * 0.0082);
             updateDisplay();
         }
 
@@ -499,34 +765,28 @@
         }
 
         setInterval(() => {
-            const randomAdd = 0.005 + (Math.random() * 0.008);
-            baseValue += randomAdd;
+            baseValue += (0.005 + (Math.random() * 0.008));
             updateDisplay();
         }, 1500);
 
         initCounter();
 
-        // 2. SISTEMA DE COMENTARIOS BASADO EN TIMESTAMPS REALES (CÁLCULO DINÁMICO)
-        const now = Date.now();
+        // 3. SISTEMA DE COMENTARIOS DINÁMICOS
+        const nowTime = Date.now();
         const min = 60 * 1000;
         const hour = 60 * min;
         const day = 24 * hour;
 
-        // Comentarios por defecto con marcas de tiempo relativas al momento actual
         const defaultComments = [
-            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", timestamp: now - (14 * min) },
-            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", timestamp: now - (48 * min) },
-            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", timestamp: now - (2 * hour) },
-            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", timestamp: now - (4 * hour) },
-            { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", timestamp: now - (1 * day) },
-            { user: "@caro_perez", text: "cancelé la suscripción a newsletters que ni leía. algo es algo!", timestamp: now - (1 * day + 4 * hour) },
-            { user: "@ing_fer", text: "buenísima iniciativa, pocos entienden el impacto de la nube", timestamp: now - (2 * day) },
-            { user: "@andrea.v", text: "mi google drive ya me pedía pagar almacenamiento, borré basura y recuperé 5GB gratis jajaja", timestamp: now - (2 * day + 5 * hour) }
+            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", timestamp: nowTime - (14 * min) },
+            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", timestamp: nowTime - (48 * min) },
+            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", timestamp: nowTime - (2 * hour) },
+            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", timestamp: nowTime - (4 * hour) },
+            { user: "@mateo_2003", text: "se siente bien vaciar la papelera de reciclaje que llevaba como 2 años llena", timestamp: nowTime - (1 * day) }
         ];
 
         function calculateTimeAgo(timestamp) {
             const diff = Date.now() - timestamp;
-            
             const diffMinutes = Math.floor(diff / (1000 * 60));
             const diffHours = Math.floor(diff / (1000 * 60 * 60));
             const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -541,15 +801,11 @@
         function loadComments() {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '';
-
             const savedComments = JSON.parse(localStorage.getItem('dt_user_comments_v2') || '[]');
-            
-            // Combinar guardados con defaults y ordenar por fecha (más reciente primero)
             const allComments = [...savedComments, ...defaultComments].sort((a, b) => b.timestamp - a.timestamp);
 
             allComments.forEach(item => {
                 const timeText = calculateTimeAgo(item.timestamp);
-                
                 const postHTML = `
                     <div class="post-item">
                         <div class="post-header">
@@ -578,7 +834,7 @@
             const newComment = {
                 user: author,
                 text: msgInput.value.trim(),
-                timestamp: Date.now() // Guardado con marca de tiempo precisa del sistema
+                timestamp: Date.now()
             };
 
             const savedComments = JSON.parse(localStorage.getItem('dt_user_comments_v2') || '[]');
@@ -589,9 +845,7 @@
             loadComments();
         }
 
-        // Recargar comentarios cada minuto para actualizar los tiempos en vivo si la página sigue abierta
         setInterval(loadComments, 60000);
-
         loadComments();
     </script>
 </body>
