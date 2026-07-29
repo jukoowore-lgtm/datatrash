@@ -55,8 +55,9 @@
         }
 
         .brand img {
-            width: 40px;
+            width: 45px;
             height: auto;
+            border-radius: 6px;
         }
 
         .brand span {
@@ -66,7 +67,7 @@
             color: var(--accent-mint);
         }
 
-        /* LIVE MONITOR (HERO) */
+        /* LIVE MONITOR */
         .live-card {
             background: linear-gradient(145deg, var(--bg-card), #0f1a15);
             border: 1px solid var(--border-color);
@@ -74,7 +75,6 @@
             padding: 35px;
             text-align: center;
             margin-bottom: 30px;
-            position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
@@ -114,6 +114,7 @@
             color: var(--text-main);
             margin: 10px 0;
             letter-spacing: -1px;
+            transition: all 0.3s ease;
         }
 
         .counter-label {
@@ -156,9 +157,52 @@
             line-height: 1.6;
         }
 
-        /* FORO / FEED PREVIEW */
-        .forum-preview {
-            margin-top: 15px;
+        /* FORO / FORMULARIO */
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .comment-form input, .comment-form textarea {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .comment-form input:focus, .comment-form textarea:focus {
+            border-color: var(--accent-mint);
+        }
+
+        .comment-form button {
+            background: var(--accent-mint);
+            color: #050a08;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .comment-form button:hover {
+            background: var(--accent-soft);
+        }
+
+        .forum-list {
+            max-height: 280px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
         }
 
         .post-item {
@@ -166,18 +210,31 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px 15px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
         }
 
         .post-author {
             color: var(--accent-mint);
             font-weight: 600;
             font-size: 0.8rem;
-            margin-bottom: 4px;
         }
 
-        /* FOOTER */
+        .post-time {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .post-text {
+            color: var(--text-main);
+            line-height: 1.4;
+        }
+
         footer {
             text-align: center;
             padding: 30px 0;
@@ -193,7 +250,7 @@
         
         <header>
             <div class="brand">
-                <img src="logo.png" alt="Data Trash Logo">
+                <img src="Logotipo.png" alt="Data Trash Logo">
                 <span>DATA TRASH</span>
             </div>
             <div style="color: var(--text-muted); font-size: 0.85rem;">Proyecto Eco-Digital</div>
@@ -205,29 +262,33 @@
                 <div class="pulse-dot"></div>
                 ESTADÍSTICA GLOBAL EN TIEMPO REAL
             </div>
-            <div class="counter-number" id="realtime-counter">0.0000</div>
-            <p class="counter-label">Toneladas de CO₂ generadas por basura digital almacenada hoy en el mundo</p>
+            <div class="counter-number" id="realtime-counter">0.00 t</div>
+            <p class="counter-label">Toneladas de CO₂ estimadas por almacenamiento inactivo hoy en el mundo</p>
         </section>
 
         <div class="grid-layout">
             <!-- CONCIENCIA -->
             <div class="card">
                 <h3>⚡ El problema invisible</h3>
-                <p>Cada correo de confirmación de 2021, cada foto repetida y cada respaldo olvidado ocupa espacio físico en servidores que consumen energía y agua dulce las 24 horas del día.</p>
+                <p>Cada correo de confirmación viejísimo, cada foto borrosa o repetida y cada respaldo olvidado ocupa espacio físico en data centers que consumen energía y agua dulce las 24 horas del día.</p>
+                <br>
+                <p>No se trata de desconectarse de internet, sino de hacer una **limpieza inteligente** para no acumular peso innecesario en la red.</p>
             </div>
 
-            <!-- SIMULADOR RÁPIDO -->
+            <!-- FORO / INTERACCIÓN -->
             <div class="card">
-                <h3>🧹 Muro del Reto (Comunidad)</h3>
-                <div class="forum-preview">
-                    <div class="post-item">
-                        <div class="post-author">@julian_dev • hace 5 min</div>
-                        "Hoy eliminé 4.2 GB de respaldos viejos y 1,200 correos de ofertas."
-                    </div>
-                    <div class="post-item">
-                        <div class="post-author">@andrea_m • hace 18 min</div>
-                        "Limpiando la galería... 300 capturas de pantalla afuera."
-                    </div>
+                <h3>💬 Muro Comunitario</h3>
+                
+                <!-- Formulario de comentarios -->
+                <div class="comment-form">
+                    <input type="text" id="user-input" placeholder="Tu apodo o @usuario" maxlength="20">
+                    <textarea id="msg-input" rows="2" placeholder="¿Qué basura digital borraste hoy?..." maxlength="140"></textarea>
+                    <button onclick="addComment()">Publicar en el muro</button>
+                </div>
+
+                <!-- Lista de comentarios -->
+                <div class="forum-list" id="forum-list">
+                    <!-- Se generan por JS -->
                 </div>
             </div>
         </div>
@@ -239,26 +300,107 @@
     </div>
 
     <script>
-        // ALGORITMO DE TIEMPO REAL BASADO EN RELEVO ABSOLUTO (EPOCH TIME)
-        // Estimación global: ~1.85 kg de CO2 por segundo de basura acumulada activa
-        function updateCounter() {
+        // 1. ALGORITMO DE CONTADOR REALISTA Y PAUSADO
+        let baseValue = 0;
+
+        function initCounter() {
             const now = new Date();
             const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
             const elapsedSeconds = (now.getTime() - startOfDay) / 1000;
             
-            // Tasa por segundo (en toneladas de CO2 acumuladas por basura digital global)
-            const ratePerSecond = 0.0435; 
-            const totalToday = (elapsedSeconds * ratePerSecond);
+            // Tasa más realista por segundo (toneladas de CO2)
+            const ratePerSecond = 0.0082; 
+            baseValue = (elapsedSeconds * ratePerSecond);
+            updateDisplay();
+        }
 
-            document.getElementById('realtime-counter').innerText = totalToday.toLocaleString('es-ES', {
-                minimumFractionDigits: 4,
-                maximumFractionDigits: 4
+        function updateDisplay() {
+            document.getElementById('realtime-counter').innerText = baseValue.toLocaleString('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
             }) + ' t';
         }
 
-        // Actualización fluida cada 100ms
-        setInterval(updateCounter, 100);
-        updateCounter();
+        // Incremento leve cada 1.5 segundos con variación aleatoria ligera
+        setInterval(() => {
+            const randomAdd = 0.005 + (Math.random() * 0.008);
+            baseValue += randomAdd;
+            updateDisplay();
+        }, 1500);
+
+        initCounter();
+
+
+        // 2. SISTEMA DE COMENTARIOS DINÁMICOS CON TIEMPO RELATIVO
+        const defaultComments = [
+            { user: "@kevin_99", text: "mano tengo como 5mil correos de ofertas de pedidos ya viejísimos xd toca borrar", minutesAgo: 8 },
+            { user: "@sofia.mora", text: "eliminé 12GB de videos repetidos de wha, mi cel revivió literal", minutesAgo: 23 },
+            { user: "@diegoc_dev", text: "no sabía lo del agua de los data centers... brutal el dato", minutesAgo: 54 },
+            { user: "@el_samu", text: "borrando fotos del ex para salvar el planeta jajajajaj", minutesAgo: 110 }
+        ];
+
+        function getRelativeTime(minutesAgo) {
+            if (minutesAgo < 60) {
+                return `hace ${minutesAgo} min`;
+            } else {
+                const hours = Math.floor(minutesAgo / 60);
+                return `hace ${hours} h`;
+            }
+        }
+
+        function loadComments() {
+            const listContainer = document.getElementById('forum-list');
+            listContainer.innerHTML = '';
+
+            // Cargar locales del usuario si existen
+            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments') || '[]');
+            
+            // Unir y renderizar
+            const allComments = [...savedComments, ...defaultComments];
+
+            allComments.forEach(item => {
+                const timeText = item.minutesAgo !== undefined ? getRelativeTime(item.minutesAgo) : 'hace un momento';
+                
+                const postHTML = `
+                    <div class="post-item">
+                        <div class="post-header">
+                            <span class="post-author">${item.user}</span>
+                            <span class="post-time">${timeText}</span>
+                        </div>
+                        <div class="post-text">${item.text}</div>
+                    </div>
+                `;
+                listContainer.innerHTML += postHTML;
+            });
+        }
+
+        function addComment() {
+            const userInput = document.getElementById('user-input');
+            const msgInput = document.getElementById('msg-input');
+
+            if (!userInput.value.trim() || !msgInput.value.trim()) {
+                alert('Por favor escribe tu usuario y un mensaje breve.');
+                return;
+            }
+
+            let author = userInput.value.trim();
+            if (!author.startsWith('@')) author = '@' + author;
+
+            const newComment = {
+                user: author,
+                text: msgInput.value.trim(),
+                minutesAgo: 0
+            };
+
+            const savedComments = JSON.parse(localStorage.getItem('dt_user_comments') || '[]');
+            savedComments.unshift(newComment);
+            localStorage.setItem('dt_user_comments', JSON.stringify(savedComments));
+
+            msgInput.value = '';
+            loadComments();
+        }
+
+        loadComments();
     </script>
 </body>
 </html>
