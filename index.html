@@ -556,7 +556,7 @@
             <div class="slide-item active" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('slide1.jpg'), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1200');">
                 <div class="slide-overlay">
                     <div class="slide-caption">
-                        <h2>// LIMPIEZA MÁSIVA DE SERVIDORES</h2>
+                        <h2>// LIMPIEZA MASIVA DE SERVIDORES</h2>
                         <p>Los centros de datos globales procesan petabytes de datos inservibles diariamente. Aprende a mitigar tu huella digital.</p>
                     </div>
                 </div>
@@ -620,7 +620,6 @@
                         <h3>Huella de Carbono Digital</h3>
                         <p>Infografía interactiva sobre la contaminación invisible provocada por el almacenamiento en la nube.</p>
                     </div>
-                    <!-- CORREGIDO: Redirección limpia a tu documento/recurso local en lugar de Canva público -->
                     <a href="./carrusel segundo.pdf" target="_blank" class="hud-btn" style="text-align: center; justify-content: center;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> VER RECURSO
                     </a>
@@ -771,28 +770,13 @@
         initCounter();
     </script>
 
-    <!-- 3. SISTEMA DE COMENTARIOS SINCRONIZADO GLOBALMENTE (FIREBASE FIRESTORE) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // Configuración en modo cliente público de Firestore
-        const firebaseConfig = {
-            apiKey: "AIzaSyD-placeholder_key", 
-            authDomain: "datatrash-db.firebaseapp.com",
-            projectId: "datatrash-db",
-            storageBucket: "datatrash-db.appspot.com",
-            messagingSenderId: "102938475612",
-            appId: "1:102938475612:web:abc123def456"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const commentsRef = collection(db, "comments");
+    <!-- 3. SISTEMA DE COMENTARIOS AUTÓNOMO Y PERSISTENTE (LOCALSTORAGE + REGISTRO SIMULADO) -->
+    <script>
+        const STORAGE_KEY = 'datatrash_comments_v1';
 
         function calculateTimeAgo(timestamp) {
             if (!timestamp) return 'hace un momento';
-            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const date = new Date(timestamp);
             const diff = Date.now() - date.getTime();
             
             const diffMinutes = Math.floor(diff / (1000 * 60));
@@ -806,35 +790,87 @@
             return `hace ${diffDays} días`;
         }
 
-        // Suscripción en tiempo real: Cualquier cambio en la BD actualiza la UI de TODOS
-        const q = query(commentsRef, orderBy("timestamp", "desc"));
-        onSnapshot(q, (snapshot) => {
+        function getInitialComments() {
+            const now = Date.now();
+            const DAY = 24 * 60 * 60 * 1000;
+
+            return [
+                {
+                    user: '@Samuel_Dev',
+                    text: 'Hoy vacié la papelera de reciclaje del Drive, liberé 4GB de puro archivo inservible.',
+                    timestamp: now - (1 * DAY)
+                },
+                {
+                    user: '@Katty_M',
+                    text: 'Eliminé más de 500 correos viejos de promociones. De poco en poco se ayuda.',
+                    timestamp: now - (3 * DAY)
+                },
+                {
+                    user: '@EcoTech_User',
+                    text: 'Cancelé la suscripción de spam que ni leía. Excelente iniciativa.',
+                    timestamp: now - (5 * DAY)
+                },
+                {
+                    user: '@Kevin_G',
+                    text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.',
+                    timestamp: now - (6 * DAY)
+                }
+            ];
+        }
+
+        function loadComments() {
+            let saved = localStorage.getItem(STORAGE_KEY);
+            let comments = [];
+
+            if (!saved) {
+                comments = getInitialComments();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+            } else {
+                try {
+                    comments = JSON.parse(saved);
+                } catch(e) {
+                    comments = getInitialComments();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+                }
+            }
+
+            renderComments(comments);
+        }
+
+        function renderComments(comments) {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '';
 
-            if (snapshot.empty) {
-                listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">Aún no hay mensajes globales. ¡Sé el primero en comentar!</div>';
+            if (comments.length === 0) {
+                listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">Aún no hay mensajes. ¡Sé el primero en comentar!</div>';
                 return;
             }
 
-            snapshot.forEach((doc) => {
-                const item = doc.data();
+            // Ordenar por fecha descendente (más recientes arriba)
+            comments.sort((a, b) => b.timestamp - a.timestamp);
+
+            comments.forEach((item) => {
                 const timeText = calculateTimeAgo(item.timestamp);
                 const postHTML = `
                     <div class="post-item">
                         <div class="post-header">
-                            <span class="post-author">${item.user}</span>
+                            <span class="post-author">${escapeHTML(item.user)}</span>
                             <span class="post-time">${timeText}</span>
                         </div>
-                        <div class="post-text" style="color: var(--text-main);">${item.text}</div>
+                        <div class="post-text" style="color: var(--text-main);">${escapeHTML(item.text)}</div>
                     </div>
                 `;
                 listContainer.innerHTML += postHTML;
             });
-        });
+        }
 
-        // Event listener para publicar directo en la base de datos distribuida
-        document.getElementById('btn-publish').addEventListener('click', async () => {
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        document.getElementById('btn-publish').addEventListener('click', () => {
             const userInput = document.getElementById('user-input');
             const msgInput = document.getElementById('msg-input');
 
@@ -846,17 +882,27 @@
             let author = userInput.value.trim();
             if (!author.startsWith('@')) author = '@' + author;
 
-            try {
-                await addDoc(commentsRef, {
-                    user: author,
-                    text: msgInput.value.trim(),
-                    timestamp: serverTimestamp()
-                });
-                msgInput.value = '';
-            } catch (err) {
-                console.error("Error al publicar en la base de datos:", err);
+            const newComment = {
+                user: author,
+                text: msgInput.value.trim(),
+                timestamp: Date.now()
+            };
+
+            let comments = [];
+            let saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try { comments = JSON.parse(saved); } catch(e) { comments = []; }
             }
+
+            comments.push(newComment);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+
+            msgInput.value = '';
+            renderComments(comments);
         });
+
+        // Inicializar muro de comentarios al cargar la página
+        loadComments();
     </script>
 </body>
 </html>
