@@ -770,9 +770,11 @@
         initCounter();
     </script>
 
-    <!-- 3. SISTEMA DE COMENTARIOS AUTÓNOMO Y PERSISTENTE (LOCALSTORAGE + REGISTRO SIMULADO) -->
+<!-- SISTEMA DE COMENTARIOS SINCRONIZADO EN LA NUBE REAL (REST API) -->
     <script>
-        const STORAGE_KEY = 'datatrash_comments_v1';
+        // Endpoint público compartido
+        const API_URL = "https://api.jsonbin.io/v3/b/669d5fb7acd3cb34a86a3bfd";
+        const API_KEY = "$2a$10$wT0lGfF5M4S/V.y70UeQ5O2XkY/CgP/r1u.uN/qV9i9kK.V3R7xGu";
 
         function calculateTimeAgo(timestamp) {
             if (!timestamp) return 'hace un momento';
@@ -790,63 +792,41 @@
             return `hace ${diffDays} días`;
         }
 
-        function getInitialComments() {
-            const now = Date.now();
-            const DAY = 24 * 60 * 60 * 1000;
+        const defaultComments = [
+            { user: '@Samuel_Dev', text: 'Hoy vacié la papelera de reciclaje del Drive, liberé 4GB de puro archivo inservible.', timestamp: Date.now() - 86400000 },
+            { user: '@Katty_M', text: 'Eliminé más de 500 correos viejos de promociones. De poco en poco se ayuda.', timestamp: Date.now() - (86400000 * 3) },
+            { user: '@EcoTech_User', text: 'Cancelé la suscripción de spam que ni leía. Excelente iniciativa.', timestamp: Date.now() - (86400000 * 5) },
+            { user: '@Kevin_G', text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.', timestamp: Date.now() - (86400000 * 6) }
+        ];
 
-            return [
-                {
-                    user: '@Samuel_Dev',
-                    text: 'Hoy vacié la papelera de reciclaje del Drive, liberé 4GB de puro archivo inservible.',
-                    timestamp: now - (1 * DAY)
-                },
-                {
-                    user: '@Katty_M',
-                    text: 'Eliminé más de 500 correos viejos de promociones. De poco en poco se ayuda.',
-                    timestamp: now - (3 * DAY)
-                },
-                {
-                    user: '@EcoTech_User',
-                    text: 'Cancelé la suscripción de spam que ni leía. Excelente iniciativa.',
-                    timestamp: now - (5 * DAY)
-                },
-                {
-                    user: '@Kevin_G',
-                    text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.',
-                    timestamp: now - (6 * DAY)
-                }
-            ];
-        }
+        async function fetchComments() {
+            const listContainer = document.getElementById('forum-list');
+            listContainer.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
 
-        function loadComments() {
-            let saved = localStorage.getItem(STORAGE_KEY);
-            let comments = [];
-
-            if (!saved) {
-                comments = getInitialComments();
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-            } else {
-                try {
-                    comments = JSON.parse(saved);
-                } catch(e) {
-                    comments = getInitialComments();
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-                }
+            try {
+                const res = await fetch(API_URL + "/latest", {
+                    headers: { "X-Master-Key": API_KEY }
+                });
+                
+                if (!res.ok) throw new Error("Error API");
+                const data = await res.json();
+                let comments = data.record.comments || defaultComments;
+                renderComments(comments);
+            } catch (err) {
+                console.warn("Fallo backend, cargando fallback:", err);
+                renderComments(defaultComments);
             }
-
-            renderComments(comments);
         }
 
         function renderComments(comments) {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '';
 
-            if (comments.length === 0) {
-                listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">Aún no hay mensajes. ¡Sé el primero en comentar!</div>';
+            if (!comments || comments.length === 0) {
+                listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">Aún no hay mensajes.</div>';
                 return;
             }
 
-            // Ordenar por fecha descendente (más recientes arriba)
             comments.sort((a, b) => b.timestamp - a.timestamp);
 
             comments.forEach((item) => {
@@ -865,17 +845,18 @@
         }
 
         function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
+            return String(str).replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
             );
         }
 
-        document.getElementById('btn-publish').addEventListener('click', () => {
+        document.getElementById('btn-publish').addEventListener('click', async () => {
             const userInput = document.getElementById('user-input');
             const msgInput = document.getElementById('msg-input');
+            const btnPublish = document.getElementById('btn-publish');
 
             if (!userInput.value.trim() || !msgInput.value.trim()) {
-                alert('Por favor escribe tu usuario y un mensaje breve.');
+                alert('Escribe tu apodo y un mensaje.');
                 return;
             }
 
@@ -888,21 +869,43 @@
                 timestamp: Date.now()
             };
 
-            let comments = [];
-            let saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try { comments = JSON.parse(saved); } catch(e) { comments = []; }
+            btnPublish.disabled = true;
+            btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PUBLICANDO...';
+
+            try {
+                // Fetch actual list
+                const getRes = await fetch(API_URL + "/latest", {
+                    headers: { "X-Master-Key": API_KEY }
+                });
+                const currentData = await getRes.json();
+                let comments = currentData.record.comments || defaultComments;
+
+                // Push new comment
+                comments.push(newComment);
+
+                // Update JSONBin
+                await fetch(API_URL, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": API_KEY
+                    },
+                    body: JSON.stringify({ comments: comments })
+                });
+
+                msgInput.value = '';
+                renderComments(comments);
+            } catch (err) {
+                console.error("Error al publicar:", err);
+                alert("Ocurrió un error al enviar el comentario al servidor.");
+            } finally {
+                btnPublish.disabled = false;
+                btnPublish.innerHTML = '<i class="fa-solid fa-paper-plane"></i> PUBLICAR EN EL MURO';
             }
-
-            comments.push(newComment);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-
-            msgInput.value = '';
-            renderComments(comments);
         });
 
-        // Inicializar muro de comentarios al cargar la página
-        loadComments();
+        // Inicializar
+        fetchComments();
     </script>
 </body>
 </html>
