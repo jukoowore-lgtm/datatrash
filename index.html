@@ -770,11 +770,10 @@
         initCounter();
     </script>
 
-<!-- SISTEMA DE COMENTARIOS SINCRONIZADO EN LA NUBE REAL (REST API) -->
+    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (KVDB BACKEND) -->
     <script>
-        // Endpoint público compartido
-        const API_URL = "https://api.jsonbin.io/v3/b/669d5fb7acd3cb34a86a3bfd";
-        const API_KEY = "$2a$10$wT0lGfF5M4S/V.y70UeQ5O2XkY/CgP/r1u.uN/qV9i9kK.V3R7xGu";
+        const BUCKET_ID = "datatrash_jukoowore_2026";
+        const API_URL = `https://kvdb.io/${BUCKET_ID}/comments`;
 
         function calculateTimeAgo(timestamp) {
             if (!timestamp) return 'hace un momento';
@@ -804,16 +803,17 @@
             listContainer.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
 
             try {
-                const res = await fetch(API_URL + "/latest", {
-                    headers: { "X-Master-Key": API_KEY }
-                });
-                
-                if (!res.ok) throw new Error("Error API");
-                const data = await res.json();
-                let comments = data.record.comments || defaultComments;
-                renderComments(comments);
+                const res = await fetch(API_URL);
+                if (res.status === 404) {
+                    renderComments(defaultComments);
+                    return;
+                }
+                if (!res.ok) throw new Error("Error en la solicitud");
+
+                const comments = await res.json();
+                renderComments(comments && comments.length ? comments : defaultComments);
             } catch (err) {
-                console.warn("Fallo backend, cargando fallback:", err);
+                console.warn("Servidor iniciando o fallback activo:", err);
                 renderComments(defaultComments);
             }
         }
@@ -873,38 +873,40 @@
             btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PUBLICANDO...';
 
             try {
-                // Fetch actual list
-                const getRes = await fetch(API_URL + "/latest", {
-                    headers: { "X-Master-Key": API_KEY }
-                });
-                const currentData = await getRes.json();
-                let comments = currentData.record.comments || defaultComments;
+                let currentComments = [];
+                try {
+                    const getRes = await fetch(API_URL);
+                    if (getRes.ok) {
+                        currentComments = await getRes.json();
+                    }
+                } catch (e) {}
 
-                // Push new comment
-                comments.push(newComment);
+                if (!currentComments || !currentComments.length) {
+                    currentComments = [...defaultComments];
+                }
 
-                // Update JSONBin
-                await fetch(API_URL, {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-Master-Key": API_KEY
-                    },
-                    body: JSON.stringify({ comments: comments })
+                currentComments.unshift(newComment);
+
+                const putRes = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(currentComments)
                 });
+
+                if (!putRes.ok) throw new Error("No se pudo guardar");
 
                 msgInput.value = '';
-                renderComments(comments);
+                renderComments(currentComments);
             } catch (err) {
                 console.error("Error al publicar:", err);
-                alert("Ocurrió un error al enviar el comentario al servidor.");
+                alert("Ocurrió un pequeño fallo al conectar con la red. Intenta de nuevo.");
             } finally {
                 btnPublish.disabled = false;
                 btnPublish.innerHTML = '<i class="fa-solid fa-paper-plane"></i> PUBLICAR EN EL MURO';
             }
         });
 
-        // Inicializar
+        // Cargar datos
         fetchComments();
     </script>
 </body>
