@@ -770,10 +770,33 @@
         initCounter();
     </script>
 
-    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (KVDB BACKEND) -->
+    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (JSONBLOB BACKEND) -->
+    <!--
+        ⚠️ LEE ESTO ANTES DE PUBLICAR ⚠️
+        BLOB_URL de abajo es un marcador de posición ("TU_BLOB_URL_AQUI").
+        KVdb.io estaba rechazando la escritura (error 403), así que se
+        cambió a jsonblob.com: es más simple, no pide email ni claves, y
+        funciona bien desde el navegador.
+
+        CÓMO CREAR TU BLOB REAL (una sola vez, tarda 10 segundos):
+        1. Abre cualquier página, presiona F12 (consola del navegador).
+        2. Si aparece la advertencia de "pegar código", escribe:
+             allow pasting
+           y presiona Enter.
+        3. Pega y ejecuta esto:
+             fetch('https://jsonblob.com/api/jsonBlob', {
+               method: 'POST',
+               headers: { 'Content-Type': 'application/json' },
+               body: JSON.stringify([])
+             }).then(r => console.log('TU BLOB URL:', r.headers.get('Location')));
+        4. Copia la URL completa que te imprime (algo como
+           "https://jsonblob.com/api/jsonBlob/1234567890123456789").
+        5. Pégala abajo, reemplazando "TU_BLOB_URL_AQUI".
+        6. Sube el archivo a GitHub. Listo: ahora todos comparten el mismo muro.
+    -->
     <script>
-        const BUCKET_ID = "9htwxhCmpcg9ZhoKLbaWbg";
-        const API_URL = `https://kvdb.io/${BUCKET_ID}/comments`;
+        const BLOB_URL = "https://jsonblob.com/api/jsonBlob/019fb0af-6b7e-7cea-99bc-6703b641d8c9";
+        const API_URL = BLOB_URL;
 
         function calculateTimeAgo(timestamp) {
             if (!timestamp) return 'hace un momento';
@@ -798,8 +821,8 @@
             { user: '@Kevin_G', text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.', timestamp: Date.now() - (86400000 * 6) }
         ];
 
-        if (BUCKET_ID === "TU_BUCKET_ID_AQUI") {
-            console.warn("⚠️ DATA TRASH: falta configurar un BUCKET_ID real de KVdb.io. Revisa el comentario justo encima de este <script> en el HTML. Mientras tanto el muro solo mostrará los comentarios de ejemplo y no se compartirá entre visitantes.");
+        if (BLOB_URL === "TU_BLOB_URL_AQUI") {
+            console.warn("⚠️ DATA TRASH: falta configurar un BLOB_URL real de jsonblob.com. Revisa el comentario justo encima de este <script> en el HTML. Mientras tanto el muro solo mostrará los comentarios de ejemplo y no se compartirá entre visitantes.");
         }
 
         // Evita que el navegador (o una CDN) devuelva una copia en caché de los
@@ -912,7 +935,7 @@
                 currentComments.unshift(newComment);
 
                 const putRes = await fetch(API_URL, {
-                    method: "POST",
+                    method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(currentComments)
                 });
