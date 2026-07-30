@@ -772,7 +772,7 @@
 
     <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (KVDB BACKEND) -->
     <script>
-        const BUCKET_ID = "datatrash_jukoowore_2026";
+        const BUCKET_ID = "9htwxhCmpcg9ZhoKLbaWbg";
         const API_URL = `https://kvdb.io/${BUCKET_ID}/comments`;
 
         function calculateTimeAgo(timestamp) {
@@ -798,12 +798,23 @@
             { user: '@Kevin_G', text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.', timestamp: Date.now() - (86400000 * 6) }
         ];
 
+        if (BUCKET_ID === "TU_BUCKET_ID_AQUI") {
+            console.warn("⚠️ DATA TRASH: falta configurar un BUCKET_ID real de KVdb.io. Revisa el comentario justo encima de este <script> en el HTML. Mientras tanto el muro solo mostrará los comentarios de ejemplo y no se compartirá entre visitantes.");
+        }
+
+        // Evita que el navegador (o una CDN) devuelva una copia en caché de los
+        // comentarios: eso hacía que un visitante viera datos "viejos" aunque
+        // otra persona ya hubiera publicado algo nuevo.
+        function noCacheURL(url) {
+            return `${url}?t=${Date.now()}`;
+        }
+
         async function fetchComments() {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
 
             try {
-                const res = await fetch(API_URL);
+                const res = await fetch(noCacheURL(API_URL), { cache: 'no-store' });
                 if (res.status === 404) {
                     renderComments(defaultComments);
                     return;
@@ -874,12 +885,25 @@
 
             try {
                 let currentComments = [];
+                let readOk = false;
                 try {
-                    const getRes = await fetch(API_URL);
+                    const getRes = await fetch(noCacheURL(API_URL), { cache: 'no-store' });
                     if (getRes.ok) {
                         currentComments = await getRes.json();
+                        readOk = true;
+                    } else if (getRes.status === 404) {
+                        // Aún no existe ningún comentario guardado: partimos de los de ejemplo.
+                        currentComments = [];
+                        readOk = true;
                     }
                 } catch (e) {}
+
+                if (!readOk) {
+                    // No se pudo confirmar el estado actual del muro: mejor no publicar
+                    // a ciegas, porque sobrescribiríamos (y borraríamos) los comentarios
+                    // reales de otras personas con una copia desactualizada.
+                    throw new Error("No se pudo leer el estado actual del muro antes de publicar");
+                }
 
                 if (!currentComments || !currentComments.length) {
                     currentComments = [...defaultComments];
