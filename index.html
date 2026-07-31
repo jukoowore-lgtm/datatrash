@@ -533,7 +533,31 @@
             text-decoration: none;
         }
 
+        .frame-cover {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: transform 0.4s ease;
+        }
+
+        .frame-media:hover .frame-cover {
+            transform: scale(1.04);
+        }
+
+        .frame-media::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(6,10,8,0.15) 0%, rgba(6,10,8,0.55) 100%);
+            z-index: 2;
+        }
+
         .play-overlay {
+            position: relative;
+            z-index: 3;
             width: 68px;
             height: 68px;
             border-radius: 50%;
@@ -702,6 +726,84 @@
                 padding-left: 0;
                 padding-top: 10px;
             }
+        }
+
+        /* MATERIAL DE CAMPAÑA: CARRUSELES EDUCATIVOS + VIÑETA */
+        .material-section {
+            margin-bottom: 40px;
+        }
+
+        .decks-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .slide-deck-title {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .slide-deck-frame {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            border: 1px solid var(--border-color);
+            clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+            overflow: hidden;
+            background: var(--bg-card);
+        }
+
+        .slide-deck-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #0c1410;
+            display: block;
+        }
+
+        .slide-deck-counter {
+            position: absolute;
+            bottom: 10px;
+            right: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent-mint);
+            background: rgba(6, 10, 8, 0.75);
+            padding: 3px 9px;
+            border: 1px solid var(--border-color);
+            z-index: 5;
+        }
+
+        .slide-deck-frame .frame-nav {
+            width: 34px;
+            height: 34px;
+        }
+
+        /* La viñeta se muestra tal cual, como una imagen normal de ancho completo */
+        .comic-break {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .comic-break p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 14px;
+        }
+
+        .comic-break img {
+            max-width: 100%;
+            width: 100%;
+            height: auto;
+            border: 1px solid var(--border-color);
+            clip-path: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
+        }
+
+        @media (max-width: 768px) {
+            .decks-grid { grid-template-columns: 1fr; }
         }
 
         /* GRID INFERIOR (FORO + CONCIENCIA) */
@@ -946,7 +1048,7 @@
                         <h3>Huella de Carbono Digital</h3>
                         <p>Infografía interactiva sobre la contaminación invisible provocada por el almacenamiento en la nube.</p>
                     </div>
-                    <a href="./carrusel segundo.pdf" target="_blank" class="hud-btn" style="text-align: center; justify-content: center;">
+                    <a href="./infografia-data-trash.pdf" target="_blank" class="hud-btn" style="text-align: center; justify-content: center;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> VER RECURSO
                     </a>
                 </div>
@@ -995,6 +1097,7 @@
                     </button>
 
                     <a href="#" target="_blank" rel="noopener" class="frame-media" id="video-frame-media">
+                        <img src="" alt="" class="frame-cover" id="video-frame-cover">
                         <div class="play-overlay"><i class="fa-solid fa-play"></i></div>
                     </a>
 
@@ -1033,6 +1136,54 @@
             </div>
         </section>
 
+        <!-- MATERIAL DE CAMPAÑA: los 2 carruseles educativos + la viñeta -->
+        <!--
+            Las imágenes de los carruseles (carrusel1-1.jpg...carrusel1-7.jpg y
+            carrusel2-1.jpg...carrusel2-8.jpg), la infografía en PDF
+            (infografia-data-trash.pdf) y la viñeta (vineta-data-trash.jpg) van
+            en la misma carpeta que este index.html al subirlo a GitHub.
+        -->
+        <section class="material-section reveal">
+            <div class="section-header">
+                <span class="tag-badge">DOCUMENTOS</span>
+                <h2>Carruseles Educativos</h2>
+            </div>
+
+            <div class="decks-grid">
+                <div>
+                    <div class="slide-deck-title">Huella de Carbono Digital y Sostenibilidad</div>
+                    <div class="slide-deck-frame" id="deck1-frame">
+                        <button type="button" class="frame-nav prev" id="deck1-prev" aria-label="Diapositiva anterior">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <img id="deck1-img" src="carrusel1-1.jpg" alt="Huella de Carbono Digital y Sostenibilidad — diapositiva 1">
+                        <button type="button" class="frame-nav next" id="deck1-next" aria-label="Siguiente diapositiva">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <div class="slide-deck-counter" id="deck1-counter">1 / 7</div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="slide-deck-title">Huella de Carbono Digital: El Impacto Invisible</div>
+                    <div class="slide-deck-frame" id="deck2-frame">
+                        <button type="button" class="frame-nav prev" id="deck2-prev" aria-label="Diapositiva anterior">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <img id="deck2-img" src="carrusel2-1.jpg" alt="Huella de Carbono Digital: El Impacto Invisible — diapositiva 1">
+                        <button type="button" class="frame-nav next" id="deck2-next" aria-label="Siguiente diapositiva">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <div class="slide-deck-counter" id="deck2-counter">1 / 8</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="comic-break">
+                <p>Y para no ponernos tan serios todo el rato:</p>
+                <img src="vineta-data-trash.jpg" alt="Viñeta: La Nube Mágica">
+            </div>
+        </section>
 
         <div class="grid-layout" id="foro">
             <div class="hud-box reveal">
@@ -1178,26 +1329,30 @@
                 title: 'Campaña Data Trash: el problema invisible',
                 icon: 'fa-brands fa-instagram',
                 platformText: 'Ver publicación completa',
-                url: 'https://www.instagram.com/reel/DbbfR8_xWs9/'
+                url: 'https://www.instagram.com/reel/DbbfR8_xWs9/',
+                cover: 'video-principal-cover.jpg'
             },
             {
                 tag: '// CLIP_01',
                 title: 'Mito o realidad tecnológica',
                 icon: 'fa-brands fa-tiktok',
                 platformText: 'Ver en TikTok',
-                url: 'TU_LINK_VIDEO_CORTO_1_AQUI'
+                url: 'TU_LINK_VIDEO_CORTO_1_AQUI',
+                cover: 'clip-mito-cover.jpg'
             },
             {
                 tag: '// CLIP_02',
                 title: 'Detectives del e-waste',
                 icon: 'fa-brands fa-instagram',
                 platformText: 'Ver en Instagram',
-                url: 'https://www.instagram.com/reel/Dbbl2emx0q_/'
+                url: 'https://www.instagram.com/reel/Dbbl2emx0q_/',
+                cover: 'clip-ewaste-cover.jpg'
             }
         ];
 
         let videoIndex = 0;
         const videoFrameMedia = document.getElementById('video-frame-media');
+        const videoFrameCover = document.getElementById('video-frame-cover');
         const videoFrameTag = document.getElementById('video-frame-tag');
         const videoFrameTitle = document.getElementById('video-frame-title');
         const videoFramePlatform = document.getElementById('video-frame-platform');
@@ -1208,6 +1363,8 @@
         function renderVideoFrame() {
             const v = VIDEO_DATA[videoIndex];
             videoFrameMedia.href = v.url;
+            videoFrameCover.src = v.cover;
+            videoFrameCover.alt = v.title;
             videoFramePlatform.href = v.url;
             videoFrameTag.textContent = v.tag;
             videoFrameTitle.textContent = v.title;
@@ -1237,6 +1394,33 @@
         });
 
         renderVideoFrame();
+
+        // 1.6 CARRUSELES DE DIAPOSITIVAS (carrusel_primer.pdf y carrusel_segundo.pdf)
+        function setupSlideDeck(prefix, totalSlides) {
+            let current = 0;
+            const img = document.getElementById(`${prefix}-img`);
+            const counter = document.getElementById(`${prefix}-counter`);
+            const prevBtn = document.getElementById(`${prefix}-prev`);
+            const nextBtn = document.getElementById(`${prefix}-next`);
+
+            function render() {
+                img.src = `${prefix.replace('deck', 'carrusel')}-${current + 1}.jpg`;
+                counter.textContent = `${current + 1} / ${totalSlides}`;
+            }
+
+            prevBtn.addEventListener('click', () => {
+                current = (current - 1 + totalSlides) % totalSlides;
+                render();
+            });
+
+            nextBtn.addEventListener('click', () => {
+                current = (current + 1) % totalSlides;
+                render();
+            });
+        }
+
+        setupSlideDeck('deck1', 7);
+        setupSlideDeck('deck2', 8);
 
         // 2. CONTADOR EN TIEMPO REAL
         let baseValue = 0;
