@@ -1974,10 +1974,11 @@
         initCounter();
     </script>
 
-    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (JSONBLOB BACKEND) -->
+    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (GOOGLE SHEETS BACKEND) -->
     <script>
-        const BLOB_URL = "https://jsonblob.com/api/jsonBlob/019fb0af-6b7e-7cea-99bc-6703b641d8c9";
-        const API_URL = BLOB_URL;
+        // 👉 PASO IMPORTANTE: pega aquí la URL que te da Google Apps Script al publicar
+        // (termina en /exec). Mirá las instrucciones que te pasé aparte para obtenerla.
+        const API_URL = "https://script.google.com/macros/s/AKfycbwmeYwHQivy4o9UGFRiKpQGoXthNmapaIjsSdo-S_e-sCpQ3LkbZf1JVp2gvFBdiDJQ9Q/exec";
 
         function calculateTimeAgo(timestamp) {
             if (!timestamp) return 'hace un momento';
@@ -2006,16 +2007,22 @@
             return `${url}?t=${Date.now()}`;
         }
 
+        function isConfigured() {
+            return API_URL && !API_URL.startsWith("PEGA_AQUI");
+        }
+
         async function fetchComments() {
             const listContainer = document.getElementById('forum-list');
             listContainer.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
 
+            if (!isConfigured()) {
+                console.warn("Falta configurar API_URL con tu enlace de Google Apps Script.");
+                renderComments(defaultComments);
+                return;
+            }
+
             try {
                 const res = await fetch(noCacheURL(API_URL), { cache: 'no-store' });
-                if (res.status === 404) {
-                    renderComments(defaultComments);
-                    return;
-                }
                 if (!res.ok) throw new Error("Error en la solicitud");
 
                 const comments = await res.json();
@@ -2068,6 +2075,11 @@
                 return;
             }
 
+            if (!isConfigured()) {
+                alert('El muro todavía no está conectado a la base de datos. Falta pegar la URL de Google Apps Script en el código (variable API_URL).');
+                return;
+            }
+
             let author = userInput.value.trim();
             if (!author.startsWith('@')) author = '@' + author;
 
@@ -2081,39 +2093,18 @@
             btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PUBLICANDO...';
 
             try {
-                let currentComments = [];
-                let readOk = false;
-                try {
-                    const getRes = await fetch(noCacheURL(API_URL), { cache: 'no-store' });
-                    if (getRes.ok) {
-                        currentComments = await getRes.json();
-                        readOk = true;
-                    } else if (getRes.status === 404) {
-                        currentComments = [];
-                        readOk = true;
-                    }
-                } catch (e) {}
-
-                if (!readOk) {
-                    throw new Error("No se pudo leer el estado actual del muro antes de publicar");
-                }
-
-                if (!currentComments || !currentComments.length) {
-                    currentComments = [...defaultComments];
-                }
-
-                currentComments.unshift(newComment);
-
-                const putRes = await fetch(API_URL, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(currentComments)
+                // Content-Type text/plain evita que el navegador dispare un "preflight" CORS,
+                // que Google Apps Script no responde bien. Del lado del script igual se lee como JSON.
+                const postRes = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(newComment)
                 });
 
-                if (!putRes.ok) throw new Error("No se pudo guardar");
+                if (!postRes.ok) throw new Error("No se pudo guardar en el servidor");
 
                 msgInput.value = '';
-                renderComments(currentComments);
+                await fetchComments();
             } catch (err) {
                 console.error("Error al publicar:", err);
                 alert("Ocurrió un pequeño fallo al conectar con la red. Intenta de nuevo.");
