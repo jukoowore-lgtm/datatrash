@@ -1563,13 +1563,12 @@
                 </div>
                 
                 <div class="comment-form">
-                    <input type="text" id="user-input" placeholder="Tu apodo o @usuario" maxlength="20">
-                    <textarea id="msg-input" rows="2" placeholder="¿Qué basura digital borraste hoy?..." maxlength="140"></textarea>
-                    <button class="hud-btn" id="btn-publish" style="width: 100%; justify-content: center;">
-                        <i class="fa-solid fa-paper-plane"></i> PUBLICAR EN EL MURO
-                    </button>
-                </div>
-
+    <input type="text" id="comment-user" placeholder="Tu nombre o @usuario">
+    <!-- Campo trampa invisible para bots -->
+    <input type="text" id="hp_field" style="display:none !important;" tabindex="-1" autocomplete="off">
+    <textarea id="comment-text" placeholder="Escribe tu mensaje..."></textarea>
+    <button type="button" id="comment-btn" class="hud-btn">PUBLICAR</button>
+</div>
                 <div class="forum-list" id="forum-list"></div>
             </div>
         </div>
@@ -2153,5 +2152,69 @@
         initCounter();
     </script>
 
+<script>
+(function() {
+    const userInp = document.getElementById('comment-user');
+    const textInp = document.getElementById('comment-text');
+    const hpInp = document.getElementById('hp_field');
+    const btn = document.getElementById('comment-btn');
+
+    if (!btn) return;
+
+    let lastUser = '';
+    let lastText = '';
+    let isCooldown = false;
+
+    btn.addEventListener('click', function(e) {
+        // 1. Bloqueo Honeypot (Bots)
+        if (hpInp && hpInp.value !== '') {
+            return; 
+        }
+
+        const user = userInp ? userInp.value.trim() : '';
+        const text = textInp ? textInp.value.trim() : '';
+
+        // 2. Validar campos vacíos
+        if (!user || !text) {
+            alert('Rellena todos los campos.');
+            return;
+        }
+
+        // 3. Evitar comentarios duplicados consecutivos
+        if (user === lastUser && text === lastText) {
+            alert('No puedes enviar el mismo comentario dos veces seguidas.');
+            return;
+        }
+
+        // 4. Temporizador de espera (Cooldown)
+        if (isCooldown) {
+            alert('Espera 10 segundos entre envíos.');
+            return;
+        }
+
+        // Aplicar bloqueo temporal en interfaz
+        isCooldown = true;
+        btn.disabled = true;
+        const originalText = btn.textContent;
+        btn.textContent = 'ENVIANDO...';
+
+        lastUser = user;
+        lastText = text;
+
+        // AQUÍ VA TU LÓGICA EXISTENTE DE FETCH/FETCH A GOOGLE APPS SCRIPT
+        // Ejemplo de cómo lanzar tu función de envío si ya la tienes declarada:
+        if (typeof enviarAGoogleScript === 'function') {
+            enviarAGoogleScript(user, text);
+        }
+
+        setTimeout(() => {
+            isCooldown = false;
+            btn.disabled = false;
+            btn.textContent = originalText;
+        }, 10000); // 10 segundos de espera
+    });
+})();
+</script>
+    
 </body>
 </html>
