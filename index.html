@@ -1639,7 +1639,8 @@
         ];
 
         function noCacheURL(url) {
-            return `${url}?t=${Date.now()}`;
+            const separador = url.includes('?') ? '&' : '?';
+            return `${url}${separador}t=${Date.now()}`;
         }
 
         function isConfigured() {
