@@ -1609,6 +1609,150 @@
         </div>
     </footer>
 
+    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (GOOGLE SHEETS BACKEND) -->
+    <script>
+        // 👉 PASO IMPORTANTE: pega aquí la URL que te da Google Apps Script al publicar
+        // (termina en /exec). Mirá las instrucciones que te pasé aparte para obtenerla.
+        const API_URL = "https://script.google.com/macros/s/AKfycbw-ncGrB0IgA8VwgTvcbxmRe8FrVTxqv5IeXhMYqY3sWskEOH1LmtwNrzMESjjtOHrsEQ/exec";
+
+        function calculateTimeAgo(timestamp) {
+            if (!timestamp) return 'hace un momento';
+            const date = new Date(timestamp);
+            const diff = Date.now() - date.getTime();
+            
+            const diffMinutes = Math.floor(diff / (1000 * 60));
+            const diffHours = Math.floor(diff / (1000 * 60 * 60));
+            const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (diffMinutes < 1) return 'hace un momento';
+            if (diffMinutes < 60) return `hace ${diffMinutes} min`;
+            if (diffHours < 24) return `hace ${diffHours} h`;
+            if (diffDays === 1) return 'hace 1 día';
+            return `hace ${diffDays} días`;
+        }
+
+        const defaultComments = [
+            { user: '@Samuel_Dev', text: 'Hoy vacié la papelera de reciclaje del Drive, liberé 4GB de puro archivo inservible.', timestamp: Date.now() - 86400000 },
+            { user: '@Katty_M', text: 'Eliminé más de 500 correos viejos de promociones. De poco en poco se ayuda.', timestamp: Date.now() - (86400000 * 3) },
+            { user: '@EcoTech_User', text: 'Cancelé la suscripción de spam que ni leía. Excelente iniciativa.', timestamp: Date.now() - (86400000 * 5) },
+            { user: '@Kevin_G', text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.', timestamp: Date.now() - (86400000 * 6) }
+        ];
+
+        function noCacheURL(url) {
+            return `${url}?t=${Date.now()}`;
+        }
+
+        function isConfigured() {
+            return API_URL && !API_URL.startsWith("PEGA_AQUI");
+        }
+
+        async function fetchComments() {
+            const listContainer = document.getElementById('forum-list');
+            listContainer.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
+
+            if (!isConfigured()) {
+                console.warn("Falta configurar API_URL con tu enlace de Google Apps Script.");
+                renderComments(defaultComments);
+                return;
+            }
+
+            try {
+                const res = await fetch(noCacheURL(`${API_URL}?tipo=comentarios`), { cache: 'no-store' });
+                if (!res.ok) throw new Error("Error en la solicitud");
+
+                const comments = await res.json();
+                renderComments(comments && comments.length ? comments : defaultComments);
+            } catch (err) {
+                console.warn("Servidor iniciando o fallback activo:", err);
+                renderComments(defaultComments);
+            }
+        }
+
+        function renderComments(comments) {
+            const listContainer = document.getElementById('forum-list');
+            listContainer.innerHTML = '';
+
+            if (!comments || comments.length === 0) {
+                listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">Aún no hay mensajes.</div>';
+                return;
+            }
+
+            comments.sort((a, b) => b.timestamp - a.timestamp);
+
+            comments.forEach((item) => {
+                const timeText = calculateTimeAgo(item.timestamp);
+                const postHTML = `
+                    <div class="post-item">
+                        <div class="post-header">
+                            <span class="post-author">${escapeHTML(item.user)}</span>
+                            <span class="post-time">${timeText}</span>
+                        </div>
+                        <div class="post-text" style="color: var(--text-main);">${escapeHTML(item.text)}</div>
+                    </div>
+                `;
+                listContainer.innerHTML += postHTML;
+            });
+        }
+
+        function escapeHTML(str) {
+            return String(str).replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        document.getElementById('btn-publish').addEventListener('click', async () => {
+            const userInput = document.getElementById('user-input');
+            const msgInput = document.getElementById('msg-input');
+            const btnPublish = document.getElementById('btn-publish');
+
+            if (!userInput.value.trim() || !msgInput.value.trim()) {
+                alert('Escribe tu apodo y un mensaje.');
+                return;
+            }
+
+            if (!isConfigured()) {
+                alert('El muro todavía no está conectado a la base de datos. Falta pegar la URL de Google Apps Script en el código (variable API_URL).');
+                return;
+            }
+
+            let author = userInput.value.trim();
+            if (!author.startsWith('@')) author = '@' + author;
+
+            const newComment = {
+                tipo: 'comentarios',
+                user: author,
+                text: msgInput.value.trim(),
+                timestamp: Date.now()
+            };
+
+            btnPublish.disabled = true;
+            btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PUBLICANDO...';
+
+            try {
+                // Content-Type text/plain evita que el navegador dispare un "preflight" CORS,
+                // que Google Apps Script no responde bien. Del lado del script igual se lee como JSON.
+                const postRes = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify(newComment)
+                });
+
+                if (!postRes.ok) throw new Error("No se pudo guardar en el servidor");
+
+                msgInput.value = '';
+                await fetchComments();
+            } catch (err) {
+                console.error("Error al publicar:", err);
+                alert("Ocurrió un pequeño fallo al conectar con la red. Intenta de nuevo.");
+            } finally {
+                btnPublish.disabled = false;
+                btnPublish.innerHTML = '<i class="fa-solid fa-paper-plane"></i> PUBLICAR EN EL MURO';
+            }
+        });
+
+        fetchComments();
+    </script>
+
     <!-- JS GLOBAL PARA SLIDER Y TELEMETRÍA -->
     <script>
         // 0. PANTALLA DE CARGA, HEADER STICKY, ANIMACIONES DE SCROLL Y NAV ACTIVO
@@ -1877,20 +2021,42 @@
         const commitFeedback = document.getElementById('commit-feedback');
         const commitList = document.getElementById('commit-list');
 
-        let PARTICIPANTS = [
-            { user: '@EcoTech_User', text: 'Desactivar la reproducción automática', time: 'hace 2 días' },
-            { user: '@Katty_M', text: 'Borrar correos y archivos innecesarios', time: 'hace 3 días' },
-            { user: '@Samuel_Dev', text: 'Reparar antes de comprar', time: 'hace 5 días' }
+        const defaultParticipants = [
+            { user: '@EcoTech_User', text: 'Desactivar la reproducción automática', timestamp: Date.now() - (86400000 * 2) },
+            { user: '@Katty_M', text: 'Borrar correos y archivos innecesarios', timestamp: Date.now() - (86400000 * 3) },
+            { user: '@Samuel_Dev', text: 'Reparar antes de comprar', timestamp: Date.now() - (86400000 * 5) }
         ];
 
-        function renderParticipants() {
-            commitList.innerHTML = PARTICIPANTS.map(p => `
+        async function fetchParticipants() {
+            commitList.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
+
+            if (!isConfigured()) {
+                renderParticipants(defaultParticipants);
+                return;
+            }
+
+            try {
+                const res = await fetch(noCacheURL(`${API_URL}?tipo=compromisos`), { cache: 'no-store' });
+                if (!res.ok) throw new Error("Error en la solicitud");
+
+                const items = await res.json();
+                renderParticipants(items && items.length ? items : defaultParticipants);
+            } catch (err) {
+                console.warn("Servidor iniciando o fallback activo:", err);
+                renderParticipants(defaultParticipants);
+            }
+        }
+
+        function renderParticipants(items) {
+            const ordenados = [...items].sort((a, b) => b.timestamp - a.timestamp);
+
+            commitList.innerHTML = ordenados.map(p => `
                 <div class="commit-item">
                     <div class="commit-item-header">
-                        <span class="commit-item-user">${p.user}</span>
-                        <span class="commit-item-time">${p.time}</span>
+                        <span class="commit-item-user">${escapeHTML(p.user)}</span>
+                        <span class="commit-item-time">${calculateTimeAgo(p.timestamp)}</span>
                     </div>
-                    <div class="commit-item-text">${p.text}</div>
+                    <div class="commit-item-text">${escapeHTML(p.text)}</div>
                 </div>
             `).join('');
         }
@@ -1905,7 +2071,7 @@
             if (commitSelect.value === 'otro') commitCustomInput.focus();
         });
 
-        commitForm.addEventListener('submit', (e) => {
+        commitForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const user = commitUserInput.value.trim();
@@ -1934,20 +2100,49 @@
                 return;
             }
 
+            if (!isConfigured()) {
+                showCommitFeedback('El muro todavía no está conectado a la base de datos.', 'error');
+                return;
+            }
+
             const displayUser = user.startsWith('@') ? user : `@${user}`;
+            const submitBtn = commitForm.querySelector('button[type="submit"]');
+            const originalBtnHTML = submitBtn.innerHTML;
 
-            PARTICIPANTS.unshift({ user: displayUser, text: commitText, time: 'justo ahora' });
-            renderParticipants();
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ENVIANDO...';
 
-            showCommitFeedback(`¡Listo, ${displayUser}! Tu compromiso quedó registrado en el muro.`, 'success');
+            try {
+                const postRes = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        tipo: 'compromisos',
+                        user: displayUser,
+                        text: commitText,
+                        timestamp: Date.now()
+                    })
+                });
 
-            commitForm.reset();
-            commitCustomInput.style.display = 'none';
+                if (!postRes.ok) throw new Error("No se pudo guardar en el servidor");
 
-            setTimeout(() => { commitFeedback.textContent = ''; commitFeedback.className = 'commit-feedback'; }, 4000);
+                await fetchParticipants();
+
+                showCommitFeedback(`¡Listo, ${displayUser}! Tu compromiso quedó registrado en el muro.`, 'success');
+
+                commitForm.reset();
+                commitCustomInput.style.display = 'none';
+            } catch (err) {
+                console.error("Error al registrar compromiso:", err);
+                showCommitFeedback('Ocurrió un pequeño fallo al conectar con la red. Intenta de nuevo.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHTML;
+                setTimeout(() => { commitFeedback.textContent = ''; commitFeedback.className = 'commit-feedback'; }, 4000);
+            }
         });
 
-        renderParticipants();
+        fetchParticipants();
 
         // 2. CONTADOR EN TIEMPO REAL
         let baseValue = 0;
@@ -1974,147 +2169,5 @@
         initCounter();
     </script>
 
-    <!-- SISTEMA DE COMENTARIOS SINCRONIZADO GLOBAL (GOOGLE SHEETS BACKEND) -->
-    <script>
-        // 👉 PASO IMPORTANTE: pega aquí la URL que te da Google Apps Script al publicar
-        // (termina en /exec). Mirá las instrucciones que te pasé aparte para obtenerla.
-        const API_URL = "https://script.google.com/macros/s/AKfycbw-ncGrB0IgA8VwgTvcbxmRe8FrVTxqv5IeXhMYqY3sWskEOH1LmtwNrzMESjjtOHrsEQ/exec";
-
-        function calculateTimeAgo(timestamp) {
-            if (!timestamp) return 'hace un momento';
-            const date = new Date(timestamp);
-            const diff = Date.now() - date.getTime();
-            
-            const diffMinutes = Math.floor(diff / (1000 * 60));
-            const diffHours = Math.floor(diff / (1000 * 60 * 60));
-            const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-            if (diffMinutes < 1) return 'hace un momento';
-            if (diffMinutes < 60) return `hace ${diffMinutes} min`;
-            if (diffHours < 24) return `hace ${diffHours} h`;
-            if (diffDays === 1) return 'hace 1 día';
-            return `hace ${diffDays} días`;
-        }
-
-        const defaultComments = [
-            { user: '@Samuel_Dev', text: 'Hoy vacié la papelera de reciclaje del Drive, liberé 4GB de puro archivo inservible.', timestamp: Date.now() - 86400000 },
-            { user: '@Katty_M', text: 'Eliminé más de 500 correos viejos de promociones. De poco en poco se ayuda.', timestamp: Date.now() - (86400000 * 3) },
-            { user: '@EcoTech_User', text: 'Cancelé la suscripción de spam que ni leía. Excelente iniciativa.', timestamp: Date.now() - (86400000 * 5) },
-            { user: '@Kevin_G', text: 'Desinstalé 3 juegos pesados que ya ni abría y borré la caché. Todo más fluido.', timestamp: Date.now() - (86400000 * 6) }
-        ];
-
-        function noCacheURL(url) {
-            return `${url}?t=${Date.now()}`;
-        }
-
-        function isConfigured() {
-            return API_URL && !API_URL.startsWith("PEGA_AQUI");
-        }
-
-        async function fetchComments() {
-            const listContainer = document.getElementById('forum-list');
-            listContainer.innerHTML = '<div style="color: var(--accent-mint); font-size: 0.8rem; padding: 10px;"><i class="fa-solid fa-spinner fa-spin"></i> Conectando al servidor...</div>';
-
-            if (!isConfigured()) {
-                console.warn("Falta configurar API_URL con tu enlace de Google Apps Script.");
-                renderComments(defaultComments);
-                return;
-            }
-
-            try {
-                const res = await fetch(noCacheURL(API_URL), { cache: 'no-store' });
-                if (!res.ok) throw new Error("Error en la solicitud");
-
-                const comments = await res.json();
-                renderComments(comments && comments.length ? comments : defaultComments);
-            } catch (err) {
-                console.warn("Servidor iniciando o fallback activo:", err);
-                renderComments(defaultComments);
-            }
-        }
-
-        function renderComments(comments) {
-            const listContainer = document.getElementById('forum-list');
-            listContainer.innerHTML = '';
-
-            if (!comments || comments.length === 0) {
-                listContainer.innerHTML = '<div style="color: var(--text-muted); font-size: 0.8rem;">Aún no hay mensajes.</div>';
-                return;
-            }
-
-            comments.sort((a, b) => b.timestamp - a.timestamp);
-
-            comments.forEach((item) => {
-                const timeText = calculateTimeAgo(item.timestamp);
-                const postHTML = `
-                    <div class="post-item">
-                        <div class="post-header">
-                            <span class="post-author">${escapeHTML(item.user)}</span>
-                            <span class="post-time">${timeText}</span>
-                        </div>
-                        <div class="post-text" style="color: var(--text-main);">${escapeHTML(item.text)}</div>
-                    </div>
-                `;
-                listContainer.innerHTML += postHTML;
-            });
-        }
-
-        function escapeHTML(str) {
-            return String(str).replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        document.getElementById('btn-publish').addEventListener('click', async () => {
-            const userInput = document.getElementById('user-input');
-            const msgInput = document.getElementById('msg-input');
-            const btnPublish = document.getElementById('btn-publish');
-
-            if (!userInput.value.trim() || !msgInput.value.trim()) {
-                alert('Escribe tu apodo y un mensaje.');
-                return;
-            }
-
-            if (!isConfigured()) {
-                alert('El muro todavía no está conectado a la base de datos. Falta pegar la URL de Google Apps Script en el código (variable API_URL).');
-                return;
-            }
-
-            let author = userInput.value.trim();
-            if (!author.startsWith('@')) author = '@' + author;
-
-            const newComment = {
-                user: author,
-                text: msgInput.value.trim(),
-                timestamp: Date.now()
-            };
-
-            btnPublish.disabled = true;
-            btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> PUBLICANDO...';
-
-            try {
-                // Content-Type text/plain evita que el navegador dispare un "preflight" CORS,
-                // que Google Apps Script no responde bien. Del lado del script igual se lee como JSON.
-                const postRes = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify(newComment)
-                });
-
-                if (!postRes.ok) throw new Error("No se pudo guardar en el servidor");
-
-                msgInput.value = '';
-                await fetchComments();
-            } catch (err) {
-                console.error("Error al publicar:", err);
-                alert("Ocurrió un pequeño fallo al conectar con la red. Intenta de nuevo.");
-            } finally {
-                btnPublish.disabled = false;
-                btnPublish.innerHTML = '<i class="fa-solid fa-paper-plane"></i> PUBLICAR EN EL MURO';
-            }
-        });
-
-        fetchComments();
-    </script>
 </body>
 </html>
