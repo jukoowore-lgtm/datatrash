@@ -135,7 +135,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 25px 0;
+            padding: 18px 0;
             border-bottom: 2px solid var(--border-color);
             margin-bottom: 25px;
             position: sticky;
@@ -143,28 +143,13 @@
             z-index: 100;
             background: var(--bg-primary);
             backdrop-filter: blur(0px);
-            transition: padding 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+            transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
         }
 
         header.scrolled {
-            padding: 14px 0;
             background: rgba(6, 10, 8, 0.85);
             backdrop-filter: blur(10px);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-        }
-
-        header.scrolled .brand img {
-            width: 56px;
-        }
-
-        header.scrolled .brand-text-group h1 {
-            font-size: 1.6rem;
-        }
-
-        header.scrolled .brand-text-group span {
-            opacity: 0;
-            max-height: 0;
-            margin-top: 0;
         }
 
         header::after {
