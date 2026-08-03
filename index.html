@@ -1681,6 +1681,7 @@
 
                 msgInput.value = '';
                 await fetchComments();
+                if (typeof actualizarReduccionCO2 === 'function') actualizarReduccionCO2();
             } catch (err) {
                 console.error("Error al publicar:", err);
                 alert("Ocurrió un pequeño fallo al conectar con la red. Intenta de nuevo.");
@@ -2075,6 +2076,7 @@
                 }
 
                 await fetchParticipants();
+                actualizarReduccionCO2();
 
                 showCommitFeedback(`¡Listo, ${displayUser}! Tu compromiso quedó registrado en el muro.`, 'success');
 
@@ -2093,20 +2095,48 @@
         fetchParticipants();
 
         // 2. CONTADOR EN TIEMPO REAL
+        // Metodología (documentada en el informe): el valor base sube de forma
+        // constante desde el lanzamiento de la campaña (no se reinicia por
+        // visita ni por día) y se le resta una estimación de toneladas
+        // "evitadas" por cada acción real de limpieza registrada en el sitio
+        // (comentarios + compromisos guardados en la base de datos).
+        const LANZAMIENTO_CAMPANA = new Date('2026-07-29T00:00:00').getTime();
+        const TASA_ACUMULACION_POR_SEGUNDO = 0.0082; // t CO2 estimadas / segundo (ver informe)
+        const REDUCCION_POR_ACCION = 0.045; // t CO2 "evitadas" estimadas por cada acción de limpieza registrada
+
         let baseValue = 0;
+        let reduccionTotal = 0;
+
         function initCounter() {
-            const now = new Date();
-            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            const elapsedSeconds = (now.getTime() - startOfDay) / 1000;
-            baseValue = (elapsedSeconds * 0.0082);
+            const ahora = Date.now();
+            const segundosTranscurridos = (ahora - LANZAMIENTO_CAMPANA) / 1000;
+            baseValue = segundosTranscurridos * TASA_ACUMULACION_POR_SEGUNDO;
             updateDisplay();
         }
 
         function updateDisplay() {
-            document.getElementById('realtime-counter').innerText = baseValue.toLocaleString('es-ES', {
+            const valorMostrado = Math.max(0, baseValue - reduccionTotal);
+            document.getElementById('realtime-counter').innerText = valorMostrado.toLocaleString('es-ES', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
             }) + ' t';
+        }
+
+        async function actualizarReduccionCO2() {
+            if (!isConfigured()) return;
+            try {
+                const [resComentarios, resCompromisos] = await Promise.all([
+                    fetch(noCacheURL(`${API_URL}?tipo=comentarios`), { cache: 'no-store' }),
+                    fetch(noCacheURL(`${API_URL}?tipo=compromisos`), { cache: 'no-store' })
+                ]);
+                const comentarios = resComentarios.ok ? await resComentarios.json() : [];
+                const compromisos = resCompromisos.ok ? await resCompromisos.json() : [];
+                const totalAcciones = (comentarios.length || 0) + (compromisos.length || 0);
+                reduccionTotal = totalAcciones * REDUCCION_POR_ACCION;
+            } catch (err) {
+                console.warn('No se pudo actualizar la reducción del contador:', err);
+            }
+            updateDisplay();
         }
 
         setInterval(() => {
@@ -2115,6 +2145,7 @@
         }, 1500);
 
         initCounter();
+        actualizarReduccionCO2();
     </script>
 
     
